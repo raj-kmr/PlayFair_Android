@@ -1,3 +1,4 @@
+import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import { Button, ScrollView, StyleSheet, Text, TextInput } from "react-native";
 
@@ -7,15 +8,9 @@ export const Signup = () => {
   const [password, setPassword] = useState("");
 
   const handleSignUp = async () => {
-    // const signUpResponse = await authClient.signUp.email({
-    //   email,
-    //   password,
-    //   name,
-    // });
-    // if (signUpResponse.error) {
-    //   Alert.alert("Error", signUpResponse.error.message);
-    //   return;
-    // }
+    console.log("button pressed");
+    await SecureStore.setItemAsync("email", email);
+    console.log("Key value saved");
   };
 
   return (
