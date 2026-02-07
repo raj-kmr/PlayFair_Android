@@ -1,20 +1,9 @@
-import { Stack } from "expo-router";
-import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import { AuthProvider, useAuth } from "@/features/auth/AuthContext";
+import { Stack } from "expo-router";;
 
-export default function RootLayout() {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+export function RootNavigator() {
+const  {isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    const checkUser = async () => {
-      const user = await SecureStore.getItemAsync("email");
-      if (user) {
-        setIsAuthenticated(true);
-      }
-    };
-
-    checkUser();
-  }, []);
 
   // prevents flashing wrong screen
   if (isAuthenticated === null) {
@@ -31,4 +20,12 @@ export default function RootLayout() {
       </Stack.Protected>
     </Stack>
   );
+}
+
+export default function RootLayout() {
+  return (
+    <AuthProvider>
+      <RootNavigator/>
+    </AuthProvider>
+  )
 }

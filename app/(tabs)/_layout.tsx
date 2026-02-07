@@ -1,6 +1,8 @@
 import { Tabs } from "expo-router";
+import * as SecureStore from "expo-secure-store"
 
 export default function TabLayout() {
+  
   return (
     <Tabs>
       <Tabs.Screen name="index" options={{ title: "Dashboard" }} />

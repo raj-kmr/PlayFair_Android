@@ -1,6 +1,24 @@
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 
-export function Index() {
+export default function Index() {
+  const [msg, setMsg] = useState("Loading..");
+
+  const backendConnecting = async () => {
+    try {
+      const res = await fetch("http://192.168.1.13:3000/test");
+      const data = await res.json();
+      setMsg(data.message);
+    } catch (err) {
+      console.log(err);
+      setMsg("Error whiile connecting");
+    }
+  };
+
+  useEffect(() => {
+    backendConnecting();
+  }, []);
+
   return (
     <View
       style={{
@@ -10,14 +28,15 @@ export function Index() {
       }}
     >
       <Text>Playfair App</Text>
+      <Text>{msg}</Text>
     </View>
   );
 }
 
-export default function Dashboard() {
-  return (
-    <View>
-      <Text>This is Dashboard</Text>
-    </View>
-  );
-}
+// export function Dashboard() {
+//   return (
+//     <View>
+//       <Text>This is Dashboard</Text>
+//     </View>
+//   );
+// }
