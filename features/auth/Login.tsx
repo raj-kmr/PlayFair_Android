@@ -5,10 +5,13 @@ import * as SecureStore from "expo-secure-store";
 import { useAuth } from "./AuthContext";
 
 export const Login = () => {
+  // local state for controlled form inputs
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const { login } = useAuth();
 
+  // Authenticate user and get Jwt token to change global auth state
   const handleLogin = async () => {
     try {
       const res = await fetch("http://192.168.1.13:3000/auth/signin", {
@@ -28,7 +31,7 @@ export const Login = () => {
         return;
       }
 
-      await SecureStore.setItemAsync("token", data.token);
+      // await SecureStore.setItemAsync("token", data.token);
 
       await login(data.token);
       alert("Login successful");
