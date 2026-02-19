@@ -32,11 +32,3 @@ export default function Index() {
     </View>
   );
 }
-
-// export function Dashboard() {
-//   return (
-//     <View>
-//       <Text>This is Dashboard</Text>
-//     </View>
-//   );
-// }

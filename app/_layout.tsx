@@ -11,6 +11,7 @@ const  {isAuthenticated } = useAuth();
   }
 
   return (
+    //  Switch between authenticated and unauthenticated stack
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />

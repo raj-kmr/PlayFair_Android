@@ -1,10 +1,11 @@
 import { Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export const tracking = () => {
   return (
-    <View>
+    <SafeAreaView>
       <Text>Work and Game Time Tracking</Text>
-    </View>
+    </SafeAreaView>
   );
 };
 
