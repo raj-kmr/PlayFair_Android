@@ -1,11 +1,14 @@
 import {  createContext, ReactNode, useContext, useEffect, useState } from "react";
 import * as SecureStore from "expo-secure-store"
+import { tokenStore } from "@/lib/api/tokenStore";
+import { signin as signinApi, signup as signupApi, logout as logoutApi } from "@/lib/api/authApi";
 
 // Define the public shape of the authentication context
 // ensure all consumers get consistent auth structure
 interface AuthContextType {
     isAuthenticated: boolean | null;
-    login: (token: string) => Promise<void>;
+    login: (body: {email: string, password: string}) => Promise<void>;
+    signup: (body: {username: string, email: string, password: string}) => Promise<void>;
     logout: () => Promise<void>;
 }
 
@@ -25,7 +28,7 @@ export const AuthProvider = ({ children }: Props) => {
     // on app load check if token exists and restore auth state
     useEffect(() => {
         const loadToken  = async () => {
-            const token = await SecureStore.getItemAsync("token")
+            const token = await tokenStore.get()
             setIsAuthenticated(!!token)
         };
 
@@ -33,19 +36,23 @@ export const AuthProvider = ({ children }: Props) => {
     }, [])
 
     // update auth state after successful login
-    const login = async (token: string) => {
-        await SecureStore.setItemAsync("token", token)
+    const login = async (body: {email: string, password: string}) => {
+        await signinApi(body)
         setIsAuthenticated(true);
     }  
 
+    const signup = async (body: {username: string, email: string, password: string}) => {
+        await signupApi(body)
+    }
+
     // remove token and update auth state
     const logout = async () => {
-        await SecureStore.deleteItemAsync("token")
+        await logoutApi()
         setIsAuthenticated(false)
     }
 
     return (
-        <AuthContext.Provider value={{isAuthenticated, login, logout}}>
+        <AuthContext.Provider value={{isAuthenticated, login, logout, signup}}>
             {children}
         </AuthContext.Provider>
     )

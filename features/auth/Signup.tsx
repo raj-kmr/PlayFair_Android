@@ -1,41 +1,23 @@
-import * as SecureStore from "expo-secure-store";
 import { useState } from "react";
 import { Button, ScrollView, StyleSheet, Text, TextInput } from "react-native";
+import { useAuth } from "./AuthContext";
+import { getApiErrorMessage } from "@/lib/api/apiClient";
 
 export const Signup = () => {
   // local states for form inputs
   const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { signup } = useAuth()
 
   // Sends signup request to backend to create new account
   const handleSignUp = async () => {
     try {
-      console.log(email, name, password)
-      const res = await fetch("http://192.168.1.13:3000/auth/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          username: name,
-          email,
-          password
-        })
-      })
-      
-      const data = await res.json();
-      console.log("Response", data);
-  
-      if(!res.ok){
-        alert(data.message || "Signup failed")
-        return;
-      }
-  
-      alert("Signup succssful")
+      await signup({username, email, password})
+      alert("User Account created Successfully")
     } catch(err) {
       console.log("Signup error:  ", err)
-      alert("Network error")
+      alert(getApiErrorMessage(err))
     }
 
     // await SecureStore.setItemAsync("email", email);
@@ -49,8 +31,8 @@ export const Signup = () => {
       </Text>
       <TextInput
         placeholder="Name"
-        value={name}
-        onChangeText={setName}
+        value={username}
+        onChangeText={setUsername}
         style={styles.input}
       />
       <TextInput

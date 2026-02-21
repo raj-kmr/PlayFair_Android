@@ -1,8 +1,8 @@
 import { Link } from "expo-router";
 import { useState } from "react";
 import { Button, ScrollView, StyleSheet, Text, TextInput } from "react-native";
-import * as SecureStore from "expo-secure-store";
 import { useAuth } from "./AuthContext";
+import { getApiErrorMessage } from "@/lib/api/apiClient";
 
 export const Login = () => {
   // local state for controlled form inputs
@@ -14,30 +14,11 @@ export const Login = () => {
   // Authenticate user and get Jwt token to change global auth state
   const handleLogin = async () => {
     try {
-      const res = await fetch("http://192.168.1.13:3000/auth/signin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message);
-        return;
-      }
-
-      // await SecureStore.setItemAsync("token", data.token);
-
-      await login(data.token);
-      alert("Login successful");
+     await login({email, password})
+     alert("Login successful")
     } catch (err) {
       console.log(err);
-      alert("Network error");
+      alert(getApiErrorMessage(err));
     }
   };
 
