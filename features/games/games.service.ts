@@ -32,7 +32,8 @@ export type UpdateGame = {
     imageUrl?: string | null
 }
 
-export const listGames =async () => {
+export const getGames =async () => {
+    console.log("Calling get Games");
     const { data } = await api.get<GameResponse>(endPoints.games.getGames)
     return data
 }
