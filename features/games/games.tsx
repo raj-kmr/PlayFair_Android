@@ -1,8 +1,22 @@
-import { View, Text, FlatList, StyleSheet, Alert, RefreshControl, Image, Pressable } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  Alert,
+  RefreshControl,
+  Image,
+  Pressable,
+  Modal,
+  TextInput,
+  Button,
+} from "react-native";
 import GameCard from "../../components/GameCard";
 import { useCallback, useEffect, useState } from "react";
 import { deleteGame, Game, getGames } from "./games.service";
 import { getApiErrorMessage } from "@/lib/api/apiClient";
+import GameList from "@/components/GameList";
+import * as ImagePicker from "expo-image-picker";
 
 export default function GamesScreen() {
   const [games, setGames] = useState<Game[]>([]);
@@ -10,8 +24,60 @@ export default function GamesScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [totalPlaytime, setTotalPlaytime] = useState<number>(0);
 
+  /*
+   * Modal visibility + form fields for creating a new game
+   * imageUri is local device URI (preview only). Backend needs a hosted URL.
+   */
+  const [addOpen, setAddOpen] = useState(false);
+  const [gameName, setGameName] = useState("");
+  const [hoursInput, setHoursInput] = useState("0");
+  const [imageUri, setImageUri] = useState<string | null>(null);
+
+  const resetAddForm = useCallback(() => {
+    //  Reset form fields so previous input does not persist
+    setGameName("");
+    setHoursInput("0");
+    setImageUri(null);
+  }, []);
+
+  //  Open add game modal and ensure form starts fresh
+  const openAddModal = useCallback(() => {
+    resetAddForm(); // clear old form values
+    setAddOpen(true); // show modal form
+  }, [resetAddForm]);
+
+  const closeAddModal = useCallback(() => {
+    setAddOpen(false);
+  }, []);
+
+  const pickImageAsync = async () => {
+    // Ask permission to access the user's photo library 
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if(!perm.granted) {
+      Alert.alert("Permission needed", "Please allow photo Access to pick an image")
+      return;
+    }
+    
+    // Open the image library picker
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, // Restrict to images only
+      allowsEditing: true, // allow user to crop image
+      aspect: [4, 3], // Maintain a 4:3 ratio
+      quality: 1, // max quality
+    });
+
+    // if user cancels do nothing
+    if (result.canceled) {
+      return;
+    } 
+
+    // ensure we have an asset
+    const uri = result?.assets?.[0]?.uri;
+    if(uri) setImageUri(uri)
+  };
+
   const loadGame = useCallback(async () => {
-    console.log("Calling getGames")
+    console.log("Calling getGames");
     const data = await getGames();
     setGames(data.games || []);
     setTotalPlaytime(
@@ -22,19 +88,6 @@ export default function GamesScreen() {
           : 0,
     );
   }, []);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        await loadGame();
-      } catch (err) {
-        Alert.alert("Error", getApiErrorMessage(err));
-      } finally {
-        setLoading(false);
-      }
-    })()
-  }, [loadGame]);
 
   const onRefresh = useCallback(async () => {
     try {
@@ -48,7 +101,7 @@ export default function GamesScreen() {
   }, [loadGame]);
 
   const onDelete = useCallback(
-    (id: number) => {
+    (id: number | string) => {
       Alert.alert("Delete Game?", "This will remove the game from your List ", [
         { text: "Cancel", style: "cancel" },
         {
@@ -77,60 +130,75 @@ export default function GamesScreen() {
     );
   }
 
+  useEffect(() => {
+    (async () => {
+      try {
+        setLoading(true);
+        await loadGame();
+      } catch (err) {
+        Alert.alert("Error", getApiErrorMessage(err));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [loadGame]);
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>My Games</Text>
-      <Text style={styles.subTitle}>Total playtime: {totalPlaytime} min</Text>
+    <>
+      {/* Add game modal UI */}
+      <Modal
+        visible={addOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={closeAddModal}
+      >
+        <View>
+          <Text>Add Game</Text>
+          <Pressable onPress={pickImageAsync}>
+            <Text>Pick Image</Text>
+          </Pressable>
 
-      <FlatList
-        data={games}
-        keyExtractor={(item) => String(item.id)}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-        contentContainerStyle={games.length ? styles.list : styles.emptyWrap}
-        ListEmptyComponent={
-          <Text style={styles.emptyText}>
-            No games yet. Search and add your first game.
-          </Text>
-        }
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            {item.image ? (
-              <Image source={{ uri: item.image }} style={styles.cover} />
-            ) : (
-              <View style={styles.coverPlaceholder} />
-            )}
+          {imageUri && <Image source={{ uri: imageUri }} />}
+          <Text>Enter game name:</Text>
+          <TextInput
+            value={gameName}
+            onChangeText={setGameName}
+            autoCorrect={false}
+          />
 
-            <View style={styles.cardBody}>
-              <Text style={styles.gameName} numberOfLines={1}>
-                {item.name}
-              </Text>
+          <Text>Enter your playtime hours:</Text>
+          <TextInput
+            value={hoursInput}
+            onChangeText={setHoursInput}
+            keyboardType="numeric"
+          />
 
-              <Text style={styles.meta} numberOfLines={1}>
-                {typeof item.playtime_hours === "number"
-                  ? `Playtime: ${item.playtime_hours} min`
-                  : "Playtime: 0 min"}
-              </Text>
+          <Button onPress={closeAddModal} title="Cancel"></Button>
 
-              <View style={styles.actions}>
-                <Pressable
-                  onPress={() => onDelete(item.id)}
-                  style={styles.iconBtn}
-                >
-                  <Text style={styles.deleteText}>🗑️</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        )}
+          <Button
+            onPress={() => {
+              console.log(
+                "Game Name: " + gameName,
+                "Playtime Hours: " + hoursInput,
+                "Image Uri: " + imageUri,
+              );
+            }}
+            title="Save"
+          ></Button>
+        </View>
+      </Modal>
+
+      <GameList
+        games={games}
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        onDelete={onDelete}
       />
-    </View>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16 },
   center: {
     flex: 1,
     alignItems: "center",
@@ -138,34 +206,35 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   title: { fontSize: 28, fontWeight: "700", marginBottom: 6 },
-  subTitle: { fontSize: 14, opacity: 0.7, marginBottom: 12 },
+  // container: { flex: 1, padding: 16 },
+  // subTitle: { fontSize: 14, opacity: 0.7, marginBottom: 12 },
 
-  list: { paddingBottom: 24 },
-  emptyWrap: { flexGrow: 1, justifyContent: "center" },
-  emptyText: { textAlign: "center", opacity: 0.7 },
+  // list: { paddingBottom: 24 },
+  // emptyWrap: { flexGrow: 1, justifyContent: "center" },
+  // emptyText: { textAlign: "center", opacity: 0.7 },
 
-  card: {
-    flexDirection: "row",
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-    borderRadius: 14,
-    padding: 12,
-    marginBottom: 12,
-  },
-  cover: { width: 54, height: 54, borderRadius: 10, marginRight: 12 },
-  coverPlaceholder: {
-    width: 54,
-    height: 54,
-    borderRadius: 10,
-    marginRight: 12,
-    borderWidth: 1,
-    borderColor: "#2a2a2a",
-  },
-  cardBody: { flex: 1 },
-  gameName: { fontSize: 16, fontWeight: "700", marginBottom: 4 },
-  meta: { fontSize: 12, opacity: 0.75 },
+  // card: {
+  //   flexDirection: "row",
+  //   borderWidth: 1,
+  //   borderColor: "#2a2a2a",
+  //   borderRadius: 14,
+  //   padding: 12,
+  //   marginBottom: 12,
+  // },
+  // cover: { width: 54, height: 54, borderRadius: 10, marginRight: 12 },
+  // coverPlaceholder: {
+  //   width: 54,
+  //   height: 54,
+  //   borderRadius: 10,
+  //   marginRight: 12,
+  //   borderWidth: 1,
+  //   borderColor: "#2a2a2a",
+  // },
+  // cardBody: { flex: 1 },
+  // gameName: { fontSize: 16, fontWeight: "700", marginBottom: 4 },
+  // meta: { fontSize: 12, opacity: 0.75 },
 
-  actions: { marginTop: 10, flexDirection: "row", justifyContent: "flex-end" },
-  iconBtn: { paddingVertical: 6, paddingHorizontal: 10 },
-  deleteText: { fontSize: 18 },
+  // actions: { marginTop: 10, flexDirection: "row", justifyContent: "flex-end" },
+  // iconBtn: { paddingVertical: 6, paddingHorizontal: 10 },
+  // deleteText: { fontSize: 18 },
 });
