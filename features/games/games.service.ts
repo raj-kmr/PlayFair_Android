@@ -48,7 +48,7 @@ export const updateGame = async (id: number, body: UpdateGame) => {
     return data
 }
 
-export const  deleteGame = async(id: number) => {
+export const  deleteGame = async(id: number | string) => {
     const {data} = await api.delete(endPoints.games.delete(id))
     return data
 }

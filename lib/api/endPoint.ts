@@ -7,7 +7,7 @@ export const endPoints = {
         getGames: "/games",
         createGame: "/games",
         update: (id: number) => `/games/${id}`,
-        delete: (id: number) => `/games/${id}`,
+        delete: (id: number | string) => `/games/${id}`,
         addIgdb: "/games/igdb"
     },
     igdb: {

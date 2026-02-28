@@ -1,41 +1,62 @@
+import React from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
 
 
-type Props = {
-  game: {
-    id: number;
-    name: string;
-    image: string | null;
-    playtime_hours: number;
-  };
-  onEdit: () => void;
-  onDelete: () => void;
+// Represents the UI shape of a single Game item.
+// This is intentionally lightweight and UI-focused
+
+export type GameCardItem = {
+  id: string | number; // ID can be string or number (future-proof)
+  name: string;
+  image?: string | null; // optional Image
+  playtime_hours?: number | null; // stored in minutes currently
 };
 
-export default function GameCard({ game, onEdit, onDelete }: Props) {
+/*
+* Props for Gamecard 
+* onDelete is optional because: 
+* - sometimes we may render card without delete funtionality 
+*  rightslot allows full customization (edit, button, arrow, etc.)
+*/
+type Props = {
+  item: GameCardItem;
+  onDelete?: (id: GameCardItem["id"]) => void;
+  rightSlot?: React.ReactNode;
+};
+
+export default function GameCard({ item, onDelete, rightSlot }: Props) {
   return (
     <View style={styles.card}>
-      {game.image ? (
-        <Image source={{ uri: game.image }} style={styles.image} />
+      {/* Game cover */}
+      {item.image ? (
+        <Image source={{ uri: item.image }} style={styles.cover} />
       ) : (
-        <View style={styles.placeholder} />
+        <View style={styles.coverPlaceHolder}></View>
       )}
+      <View style={styles.cardBody}>
+        {/* Game name */}
+        <Text style={styles.gameName} numberOfLines={1}>
+          {item.name}
+        </Text>
 
-      <View style={styles.info}>
-        <View>
-          <Text style={styles.name}>{game.name}</Text>
-          <Text style={styles.time}>{game.playtime_hours} hrs</Text>
-        </View>
+        {/* Playtime Display */}
+        <Text style={styles.meta} numberOfLines={1}>
+          {typeof item.playtime_hours === "number"
+            ? `Playtime: ${item.playtime_hours} min`
+            : `Playtime: 0 min`}
+        </Text>
 
+            {/* Action area (Delete or custom slot) */}
         <View style={styles.actions}>
-          <Pressable onPress={onEdit} style={styles.actionBtn}>
-            <Ionicons name="create" size={25} color="#4CAF50"/>
-          </Pressable>
-
-          <Pressable onPress={onDelete} style={styles.actionBtn}>
-            <Ionicons name="trash-outline" size={25} color="#F44336"/>
-          </Pressable>
+            {
+              rightSlot ? (
+                rightSlot
+              ) : onDelete ? (
+                <Pressable onPress={() => onDelete(item.id)} style={styles.iconBtn}>
+                  <Text style={styles.deleteText}>🗑️</Text>
+                </Pressable>
+              ) : null
+            }
         </View>
       </View>
     </View>
@@ -45,52 +66,48 @@ export default function GameCard({ game, onEdit, onDelete }: Props) {
 const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+    borderRadius: 14,
     padding: 12,
-    backgroundColor: "#e9e9e9",
-    borderRadius: 12,
     marginBottom: 12,
   },
-  image: {
-    width: 100,
-    height: 100,
-    borderRadius: 8,
+  cover: {
+    width: 54,
+    height: 54,
+    borderRadius: 10,
+    marginRight: 12,
   },
-  placeholder: {
-    width: 150,
-    height: 150,
-    backgroundColor: "#333",
-    borderRadius: 8,
+  coverPlaceHolder: {
+    width: 54,
+    height: 54,
+    borderRadius: 10,
+    marginRight: 12,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
   },
-  info: {
+  cardBody: {
     flex: 1,
-    justifyContent: "space-between",
-    marginLeft: 12,
   },
-  name: {
+  gameName: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#020202",
+    fontWeight: "700",
+    marginBottom: 4,
   },
-  time: {
-    fontSize: 17,
-    color: "#171616",
-    marginVertical: 4,
+  meta: {
+    fontSize: 12,
+    opacity: 0.75,
   },
   actions: {
+    marginTop: 10,
     flexDirection: "row",
     justifyContent: "flex-end",
-    gap: 16,
-    marginTop: 10
   },
-  actionBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6
-  }, 
-  edit: {
-    color: "#4ade80",
+  iconBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 10,
   },
-  delete: {
-    color: "#f87171",
+  deleteText: {
+    fontSize: 18,
   },
 });

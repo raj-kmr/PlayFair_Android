@@ -11,7 +11,7 @@ type Props = {
 
 export default function AddGameCard({onPress}: Props) {
     return (
-        <Pressable style={styles.card}>
+        <Pressable style={({pressed}) => [styles.card, pressed && {opacity: 0.7}]} onPress={onPress}>
             <View style={styles.center}>
                 <Text style={styles.plus}>+</Text>
                 <Text style={styles.label}>Add Game</Text>
