@@ -11,12 +11,26 @@ import {
   TextInput,
   Button,
 } from "react-native";
-import { useCallback, useEffect, useState } from "react";
-import { createGame, deleteGame, Game, getGames } from "./games.service";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  createGame,
+  deleteGame,
+  Game,
+  getGames,
+  uploadGameImage,
+} from "./games.service";
 import { getApiErrorMessage } from "@/lib/api/apiClient";
 import GameList from "@/components/GameList";
 import * as ImagePicker from "expo-image-picker";
 import AddGameCard from "@/components/AddGameCard";
+import { searchIgdb } from "../igdb/igdb.service";
+
+type IgdbGame = {
+  igdbId: number;
+  name: string;
+  imageUrl?: string | null;
+  description?: string | null;
+};
 
 export default function GamesScreen() {
   const [games, setGames] = useState<Game[]>([]);
@@ -35,6 +49,27 @@ export default function GamesScreen() {
 
   // Prevent double submit while creating a game
   const [creating, setCreating] = useState(false);
+
+  // IGDB search states
+  // ADD-from-IGDB flow state
+  const [searchText, setSearchText] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [igdbResults, setIgdbResults] = useState<IgdbGame[]>([]);
+  const [selectedIgdb, setSelectedIgdb] = useState<IgdbGame | null>(null);
+  const [addIgdbOpen, setAddIgdbOpen] = useState(false);
+  const [playedBefore, setPlayedBefore] = useState<boolean | null>(null);
+  const [playedHoursInput, setPlayedHoursInput] = useState("0");
+  const [addIgdb, setAddIgdb] = useState(false);
+
+  // Sequence counter to ignore stale IGDB search response
+  const searchSeq = useRef(0);
+  const q = searchText.trim();
+
+  // IGDB somtimes return protocol-relative URLs ("//..."). Normalize for mobile.
+  const normalizeIgdbImage = useCallback((url?: string | null) => {
+    if (!url) return null;
+    return url.startsWith("//") ? `https${url}` : url;
+  }, []);
 
   // UI accepts hours, backend stores minutes, so a function to convert
   const convertHoursToMinutes = (hoursInput: string) => {
@@ -117,6 +152,47 @@ export default function GamesScreen() {
     })();
   }, [loadGame]);
 
+  // Debounced IGDB search (wait for user to pause typing )
+  useEffect(() => {
+    const query = searchText.trim();
+
+    if (query.length < 2) {
+      setIgdbResults([]);
+      setSearching(false);
+      return;
+    }
+
+    const t = setTimeout(async () => {
+      const seq = ++searchSeq.current;
+
+      try {
+        setSearching(true);
+        const data = await searchIgdb(query);
+
+        // Ignore stale responses if user typed again
+        if (seq !== searchSeq.current) return;
+
+        setIgdbResults(
+          data.map((g) => ({
+            ...g,
+            imageUrl: normalizeIgdbImage(g.imageUrl),
+          })),
+        );
+      } catch (err) {
+        // show error only if still the latest request
+        if (seq == searchSeq.current) {
+          Alert.alert("Error", getApiErrorMessage(err));
+          setIgdbResults([]);
+        }
+      } finally {
+        // only clear loading if this request is still current
+        if (seq === searchSeq.current) setSearching(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(t);
+  }, [searchText]);
+
   const onRefresh = useCallback(async () => {
     try {
       setRefreshing(true);
@@ -164,11 +240,12 @@ export default function GamesScreen() {
 
     try {
       setCreating(true);
+      const imageUrl = imageUri ? await uploadGameImage(imageUri) : null;
       // imageUri is local , will add upload to generate upoload Url later
       await createGame({
         name,
         initialPlaytimeMinutes: minutes,
-        imageUrl: null,
+        imageUrl: imageUrl,
       });
 
       closeAddModal();
@@ -193,8 +270,35 @@ export default function GamesScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      {/* Add game modal UI */}
+      {/* Search input for discovering games from IGDB */}
+      <View style={{ padding: 7, gap: 8, marginBottom: 30, marginTop: 20 }}>
+        <TextInput
+          placeholder="e.g. Elden ring"
+          value={searchText}
+          onChangeText={setSearchText}
+          autoCorrect={false}
+          placeholderTextColor={"#888"}
+          style={styles.input}
+        ></TextInput>
+        {searchText.length > 0 ? (
+          <Pressable
+            onPress={() => {
+              setSearchText("");
+              setIgdbResults([]);
+            }}
+          >
+            <Text>Clear</Text>
+          </Pressable>
+        ) : null}
 
+        {searching ? (
+          <Text>Searching...</Text>
+        ) : q.length >= 2 && igdbResults.length === 0 ? (
+          <Text>No results!</Text>
+        ) : null}
+      </View>
+
+      {/* Add game modal UI */}
       <Modal
         visible={addOpen}
         transparent
@@ -211,6 +315,8 @@ export default function GamesScreen() {
             {imageUri && (
               <Image source={{ uri: imageUri }} style={styles.previewImg} />
             )}
+
+            {/* Input fields for game Info */}
             <Text style={styles.label}>Enter game name:</Text>
             <TextInput
               value={gameName}
@@ -223,7 +329,6 @@ export default function GamesScreen() {
 
             <Text style={styles.label}>Enter your playtime hours:</Text>
             <TextInput
-              value={hoursInput}
               onChangeText={setHoursInput}
               keyboardType="numeric"
               style={styles.input}
@@ -231,11 +336,17 @@ export default function GamesScreen() {
               placeholderTextColor={"#888"}
             />
 
+            {/* Cancel button UI */}
             <View style={styles.row}>
-              <Pressable onPress={closeAddModal} style={styles.btnGhost}>
+              <Pressable
+                onPress={closeAddModal}
+                disabled={creating}
+                style={[styles.btnGhost, creating && { opacity: 0.6 }]}
+              >
                 <Text style={styles.btnGhostText}>Cancel</Text>
               </Pressable>
 
+              {/* Save button logic */}
               <Pressable
                 onPress={onCreateGame}
                 disabled={creating}
@@ -284,7 +395,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalCard: {
-    backgroundColor: "#111",
+    backgroundColor: "#fff",
     padding: 16,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
@@ -292,13 +403,13 @@ const styles = StyleSheet.create({
     borderColor: "#2a2a2a",
   },
   modalTitle: {
-    color: "#fff",
+    color: "#000",
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 12,
   },
   label: {
-    color: "#fff",
+    color: "#000",
     marginTop: 8,
     marginBottom: 6,
   },
@@ -308,7 +419,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    color: "#fff",
+    color: "#000",
   },
   pickBtn: {
     borderWidth: 1,
@@ -319,7 +430,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   pickBtnText: {
-    color: "#fff",
+    color: "#000",
   },
   previewImg: {
     width: 120,
@@ -341,16 +452,16 @@ const styles = StyleSheet.create({
     borderColor: "#2a2a2a",
   },
   btnGhostText: {
-    color: "#fff",
+    color: "#000",
   },
   btnPrimary: {
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#000",
   },
   btnPrimaryText: {
-    color: "#000",
+    color: "#fff",
     fontWeight: "700",
   },
 });
