@@ -9,7 +9,6 @@ import {
   Pressable,
   Modal,
   TextInput,
-  Button,
 } from "react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -259,6 +258,20 @@ export default function GamesScreen() {
     }
   }, [gameName, hoursInput, closeAddModal, loadGame]);
 
+  // Start Add from IGDB flow
+  // Open/Close IGDB add flow modal and reset its state
+  const openIgdbAddFlow = (item: IgdbGame) => {
+    setSelectedIgdb(item);
+    setPlayedBefore(null);
+    setPlayedHoursInput("0");
+    setAddIgdbOpen(true);
+  };
+
+  const closeIgdbAddFlow = () => {
+    setSelectedIgdb(null);
+    setAddIgdbOpen(false);
+  }
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -297,6 +310,40 @@ export default function GamesScreen() {
           <Text>No results!</Text>
         ) : null}
       </View>
+
+
+      {q.length >= 2 ? (
+        <FlatList
+          data={igdbResults}
+          keyExtractor={(item) => String(item.igdbId)}
+          contentContainerStyle={{ gap: 10 }}
+          renderItem={({ item }) => (
+            <View style={styles.igdbRow}>
+              {item.imageUrl ? (
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={styles.igdbCover}
+                />
+              ) : (
+                <View style={styles.igdbCoverPlaceholder}></View>
+              )}
+
+              <View style={{ flex: 1 }}>
+                <Text numberOfLines={1} style={styles.igdbTitle}>
+                  {item.name}
+                </Text>
+              </View>
+
+              <Pressable
+                onPress={() => openIgdbAddFlow(item)}
+                style={styles.igdbAddBtn}
+              >
+                <Text style={styles.igdbAddText}>Add</Text>
+              </Pressable>
+            </View>
+          )}
+        ></FlatList>
+      ) : null}
 
       {/* Add game modal UI */}
       <Modal
@@ -463,5 +510,45 @@ const styles = StyleSheet.create({
   btnPrimaryText: {
     color: "#fff",
     fontWeight: "700",
+  },
+
+  igdbRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+    borderRadius: 12,
+  },
+
+  igdbCover: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+  },
+
+  igdbCoverPlaceholder: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+  },
+
+  igdbTitle: {
+    fontWeight: "600",
+  },
+
+  igdbAddBtn: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+  },
+
+  igdbAddText: {
+    fontWeight: "700",
+    color: "#000",
   },
 });
