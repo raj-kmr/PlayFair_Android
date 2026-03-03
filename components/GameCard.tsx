@@ -22,11 +22,19 @@ type Props = {
   item: GameCardItem;
   onDelete?: (id: GameCardItem["id"]) => void;
   rightSlot?: React.ReactNode;
+  onPress?: () => void;
 };
 
-export default function GameCard({ item, onDelete, rightSlot }: Props) {
+const minutesToHoursText = (minutes?: number | null) => {
+  const m =
+    typeof minutes === "number" && Number.isFinite(minutes) ? minutes : 0;
+  const h = m / 60;
+  return h % 1 === 0 ? `${h} hr` : `${h.toFixed(1)} hr`;
+};
+
+export default function GameCard({ item, onDelete, rightSlot, onPress }: Props) {
   return (
-    <View style={styles.card}>
+    <Pressable style={[styles.card, !onPress && {opacity: 0.1}] } onPress={onPress} disabled={!onPress}>
       {/* Game cover */}
       {item.image ? (
         <Image source={{ uri: item.image }} style={styles.cover} />
@@ -42,7 +50,7 @@ export default function GameCard({ item, onDelete, rightSlot }: Props) {
         {/* Playtime Display */}
         <Text style={styles.meta} numberOfLines={1}>
           {typeof item.playtime_hours === "number"
-            ? `Playtime: ${item.playtime_hours} min`
+            ? `Playtime: ${minutesToHoursText(item.playtime_hours)}`
             : `Playtime: 0 min`}
         </Text>
 
@@ -59,7 +67,7 @@ export default function GameCard({ item, onDelete, rightSlot }: Props) {
             }
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

@@ -8,7 +8,8 @@ export const endPoints = {
         createGame: "/games",
         update: (id: number) => `/games/${id}`,
         delete: (id: number | string) => `/games/${id}`,
-        addIgdb: "/games/igdb"
+        addIgdb: "/games/igdb",
+        uploadImage: "/uploads/image"
     },
     igdb: {
         search: "/igdb/search"

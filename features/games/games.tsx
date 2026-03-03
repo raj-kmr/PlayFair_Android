@@ -24,12 +24,20 @@ import GameList from "@/components/GameList";
 import * as ImagePicker from "expo-image-picker";
 import AddGameCard from "@/components/AddGameCard";
 import { searchIgdb } from "../igdb/igdb.service";
+import { router } from "expo-router";
 
 type IgdbGame = {
   igdbId: number;
   name: string;
   imageUrl?: string | null;
   description?: string | null;
+};
+
+const minutesToHoursText = (minutes?: number | null) => {
+  const m =
+    typeof minutes === "number" && Number.isFinite(minutes) ? minutes : 0;
+  const h = m / 60;
+  return h % 1 === 0 ? `${h} hr` : `${h.toFixed(1)} hr`;
 };
 
 export default function GamesScreen() {
@@ -536,6 +544,10 @@ export default function GamesScreen() {
         refreshing={refreshing}
         onRefresh={onRefresh}
         onDelete={onDelete}
+        onPressItem={(item) => router.push({
+          pathname: "/(tabs)/gamesList/[id]",
+          params: { id : String(item.id)}
+        })}
       />
 
       <View style={styles.fabWrap}>

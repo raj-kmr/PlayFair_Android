@@ -9,6 +9,13 @@ export default function TabLayout() {
       <Tabs.Screen name="gamesList" options={{ title: "Games List" }} />
       <Tabs.Screen name="tracking" options={{ title: "Tracking" }} />
       <Tabs.Screen name="profile" options={{ title: "Profile" }} />
+
+      <Tabs.Screen
+        name="gamesList/[id]"
+        options={{
+          href: null
+        }}
+      />
     </Tabs>
   );
 }

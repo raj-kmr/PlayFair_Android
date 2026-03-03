@@ -7,9 +7,10 @@ type Props = {
     onRefresh?: () => void,
     onDelete?: (id: GameCardItem["id"]) => void,
     emptyText?: string
+    onPressItem?: (item: GameCardItem) => void
 }
 
-export default function GameList({games, refreshing = false, onRefresh, onDelete, emptyText ="No games yet. Search and add your first game."}: Props) {
+export default function GameList({games, onPressItem,  refreshing = false, onRefresh, onDelete, emptyText ="No games yet. Search and add your first game."}: Props) {
     return (
         <FlatList data={games} keyExtractor={(item) => String(item.id)} refreshControl={
             onRefresh ? (
@@ -18,7 +19,7 @@ export default function GameList({games, refreshing = false, onRefresh, onDelete
         }
             contentContainerStyle={games.length ? styles.list : styles.emptyWrap}
             ListEmptyComponent={<Text style={styles.emptyText}>{emptyText}</Text>}
-            renderItem={({item}) => <GameCard item={item} onDelete={onDelete}/>}
+            renderItem={({item}) => <GameCard item={item} onDelete={onDelete} onPress={onPressItem ? () => onPressItem(item) : undefined}/>}
         />
     )
 }
