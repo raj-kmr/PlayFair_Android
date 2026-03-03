@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  addIgdbGame,
   createGame,
   deleteGame,
   Game,
@@ -67,7 +68,7 @@ export default function GamesScreen() {
   // IGDB somtimes return protocol-relative URLs ("//..."). Normalize for mobile.
   const normalizeIgdbImage = useCallback((url?: string | null) => {
     if (!url) return null;
-    return url.startsWith("//") ? `https${url}` : url;
+    return url.startsWith("//") ? `https:${url}` : url;
   }, []);
 
   // UI accepts hours, backend stores minutes, so a function to convert
@@ -260,17 +261,68 @@ export default function GamesScreen() {
 
   // Start Add from IGDB flow
   // Open/Close IGDB add flow modal and reset its state
-  const openIgdbAddFlow = (item: IgdbGame) => {
+  const openIgdbAddFlow = useCallback((item: IgdbGame) => {
     setSelectedIgdb(item);
     setPlayedBefore(null);
     setPlayedHoursInput("0");
     setAddIgdbOpen(true);
-  };
+  }, []);
 
-  const closeIgdbAddFlow = () => {
+  const closeIgdbAddFlow = useCallback(() => {
     setSelectedIgdb(null);
     setAddIgdbOpen(false);
-  }
+    setPlayedBefore(null);
+    setPlayedHoursInput("0");
+  }, []);
+
+  const onConfirmAddIgdb = useCallback(async () => {
+    if (!selectedIgdb) return;
+
+    if (playedBefore === null) {
+      Alert.alert("Select Yes or No");
+      return;
+    }
+
+    let minutes = 0;
+
+    if (playedBefore === true) {
+      const m = convertHoursToMinutes(playedHoursInput);
+
+      if (m === undefined) {
+        Alert.alert("Invalid Playtime", "Hours must be 0 or more");
+        return;
+      }
+      minutes = m;
+    }
+
+    try {
+      setAddIgdb(true);
+
+      await addIgdbGame({
+        igdbId: selectedIgdb.igdbId,
+        name: selectedIgdb.name,
+        imageUrl: normalizeIgdbImage(selectedIgdb.imageUrl) ?? null,
+        description: selectedIgdb.description ?? null,
+        playedBefore,
+        initialPlaytimeMinutes: minutes,
+      });
+
+      closeIgdbAddFlow();
+      setSearchText("");
+      setIgdbResults([]);
+      await loadGame();
+    } catch (err) {
+      Alert.alert("Error", getApiErrorMessage(err));
+    } finally {
+      setAddIgdb(false);
+    }
+  }, [
+    selectedIgdb,
+    playedBefore,
+    playedHoursInput,
+    closeIgdbAddFlow,
+    loadGame,
+  ]);
 
   if (loading) {
     return (
@@ -311,7 +363,6 @@ export default function GamesScreen() {
         ) : null}
       </View>
 
-
       {q.length >= 2 ? (
         <FlatList
           data={igdbResults}
@@ -344,6 +395,78 @@ export default function GamesScreen() {
           )}
         ></FlatList>
       ) : null}
+
+      {/* IGDB Add modal: ask if played and collect hours if needed */}
+      <Modal
+        visible={addIgdbOpen}
+        animationType="fade"
+        onRequestClose={closeIgdbAddFlow}
+      >
+        <View style={styles.popupBackdrop}>
+          <Text style={styles.popupTitle}>
+            Add {selectedIgdb?.name ?? "game"}
+          </Text>
+
+          <Text style={styles.popupText}>
+            Have you played this game before?
+          </Text>
+
+          <View style={styles.popupRow}>
+            <Pressable
+              style={[
+                styles.choiceBtn,
+                playedBefore === true && styles.choiceBtnActive,
+              ]}
+              onPress={() => setPlayedBefore(true)}
+            >
+              <Text style={styles.choiceText}>Yes</Text>
+            </Pressable>
+
+            <Pressable
+              style={[
+                styles.choiceBtn,
+                playedBefore === false && styles.choiceBtnActive,
+              ]}
+              onPress={() => setPlayedBefore(false)}
+            >
+              <Text style={styles.choiceText}>No</Text>
+            </Pressable>
+          </View>
+
+          {playedBefore === true ? (
+            <>
+              <Text style={styles.label}>Enter Playtime (hours):</Text>
+              <TextInput
+                onChangeText={setPlayedHoursInput}
+                keyboardType="decimal-pad"
+                style={styles.input}
+                placeholder="0"
+                placeholderTextColor={"#888"}
+              />
+            </>
+          ) : null}
+
+          <View style={styles.popupActions}>
+            <Pressable
+              style={styles.btnGhost}
+              onPress={closeIgdbAddFlow}
+              disabled={addIgdb}
+            >
+              <Text style={styles.btnGhostText}>Cancel</Text>
+            </Pressable>
+
+            <Pressable
+              style={styles.btnPrimary}
+              onPress={onConfirmAddIgdb}
+              disabled={addIgdb}
+            >
+              <Text style={styles.btnPrimaryText}>
+                {addIgdb ? "Adding..." : "Add to list"}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
       {/* Add game modal UI */}
       <Modal
@@ -550,5 +673,66 @@ const styles = StyleSheet.create({
   igdbAddText: {
     fontWeight: "700",
     color: "#000",
+  },
+
+  popupBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 16,
+  },
+
+  popupCard: {
+    width: "100%",
+    maxWidth: 420,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+    padding: 16,
+  },
+
+  popupTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 8,
+  },
+
+  popupText: {
+    color: "#ddd",
+    marginBottom: 12,
+  },
+
+  popupRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 12,
+  },
+
+  choiceBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#2a2a2a",
+    alignItems: "center",
+  },
+
+  choiceBtnActive: {
+    backgroundColor: "#fff",
+  },
+
+  choiceText: {
+    color: "#000",
+    fontWeight: "700",
+  },
+
+  popupActions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginTop: 12,
   },
 });
