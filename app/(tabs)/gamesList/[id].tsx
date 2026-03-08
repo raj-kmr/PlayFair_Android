@@ -1,3 +1,5 @@
+import GameDetailsScreen from "@/components/GameDetailsScreen";
+import GameSessionCard from "@/components/GameSessionCard";
 import { Game, getGames } from "@/features/games/games.service";
 import { getApiErrorMessage } from "@/lib/api/apiClient";
 import { useLocalSearchParams } from "expo-router";
@@ -74,6 +76,8 @@ export default function GameDetailsRoute() {
         <Text style={styles.meta}>
           Playtime: {minutesToHoursText(game.playtime_hours)}
         </Text>
+
+        <GameSessionCard gameId={game.id} />
 
         {game.description ? (
           <Text style={styles.desc}>{game.description}</Text>

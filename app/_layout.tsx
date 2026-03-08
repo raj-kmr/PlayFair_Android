@@ -1,9 +1,9 @@
+import { SessionProvider } from "@/context/SessionContext";
 import { AuthProvider, useAuth } from "@/features/auth/AuthContext";
-import { Stack } from "expo-router";;
+import { Stack } from "expo-router";
 
 export function RootNavigator() {
-const  {isAuthenticated } = useAuth();
-
+  const { isAuthenticated } = useAuth();
 
   // prevents flashing wrong screen
   if (isAuthenticated === null) {
@@ -25,8 +25,10 @@ const  {isAuthenticated } = useAuth();
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <RootNavigator/>
-    </AuthProvider>
-  )
+    <SessionProvider>
+      <AuthProvider>
+        <RootNavigator />
+      </AuthProvider>
+    </SessionProvider>
+  );
 }
