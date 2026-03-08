@@ -9,6 +9,7 @@ type ActiveSession  = {
     startedAt: string
 }
 
+// What the context provides to the app 
 type SessionContextValue = {
     activeSession: ActiveSession | null,
     elapsedSeconds: number,
@@ -18,7 +19,7 @@ type SessionContextValue = {
 }
 
 const SessionContext = createContext<SessionContextValue | null>(null);
-const STORAGE_KEY = "playfair.activeSession";
+const STORAGE_KEY = "playfair.activeSession"; // Key for AsyncStorage
 
 /* Session Provider manages
 * - active Session state
@@ -26,15 +27,19 @@ const STORAGE_KEY = "playfair.activeSession";
 * - perssistance across reloads
 */
 export function SessionProvider({children}: {children: React.ReactNode}) {
+    // state the store Active session
     const [activeSession, setActiveSession] = useState<ActiveSession | null>(null)
-    const [elapsedSeconds, setElapsedSeconds] = useState(0);
+    // Stores how many seconds have passed since session started
+    const [elapsedSeconds, setElapsedSeconds] = useState(0); 
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
     // Timer is derived from startedAt, prevents drift and survive reloads
+    // Start the timer
     const startTicker = (startedAtIso: string) => {
         if(intervalRef.current) clearInterval(intervalRef.current)
-        
+
+        // converting session start time into milliseconds
         const startedAtMs = new Date(startedAtIso).getTime()
 
         intervalRef.current = setInterval(() => {
@@ -43,6 +48,7 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
         }, 1000)
     }
 
+    // Stop the timer and reset elapsed time.
     const stopTicker = () => {
         if(intervalRef.current) clearInterval(intervalRef.current)
         intervalRef.current = null;
@@ -63,7 +69,7 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
 
         // server truth 
         try {  
-            const res = await api.get("/sessions/active");
+            const res = await api.get("/api/sessions/active");
             const s = res.data.session as
                     | {id: number; games_id: number; started_at: string}
                     | null;
@@ -79,8 +85,9 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
             setActiveSession(next)
             await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(next))
             startTicker(next.startedAt);
-        } catch {
+        } catch(error) {
             // If server call fails, keep local session to avoid breaking UX
+            console.log("Hydrate failed", error);
         }
     }
 
@@ -93,7 +100,7 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
 
     // Starts a session on backend then saves locally
     const startSession = async(gameId: number) => {
-        const res = await api.post(`/games/${gameId}/sessions/start`)
+        const res = await api.post(`/api/games/${gameId}/sessions/start`)
         const s = res.data.session as {id: number; games_id: number; started_at: string}
 
         const next: ActiveSession = {
@@ -109,11 +116,10 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
 
     // Ends Active session on backend.
     // Backend end "users active session" so we do not need session id in URL
-
     const endSession = async () => {
         if(!activeSession) return null
 
-        const res = await api.post(`/games/${activeSession.gamesId}/sessions/end`)
+        const res = await api.post(`/api/games/${activeSession.gamesId}/sessions/end`)
         const s = res.data.session as {duration_seconds: number}
 
         setActiveSession(null)
@@ -130,6 +136,7 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
     return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>
 }
 
+//custom hook to use session context
 export function useSession() {
     const ctx = useContext(SessionContext)
     if (!ctx) throw new Error("useSession must be used within SessionProvider")
