@@ -30,7 +30,7 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
     // state the store Active session
     const [activeSession, setActiveSession] = useState<ActiveSession | null>(null)
     // Stores how many seconds have passed since session started
-    const [elapsedSeconds, setElapsedSeconds] = useState(0); 
+    const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -42,10 +42,13 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
         // converting session start time into milliseconds
         const startedAtMs = new Date(startedAtIso).getTime()
 
-        intervalRef.current = setInterval(() => {
+        const updateElapsed = () => {
             const sec = Math.max(0, Math.floor((Date.now() - startedAtMs) / 1000))
-            setElapsedSeconds(sec)
-        }, 1000)
+            setElapsedSeconds(sec);
+        }
+
+        updateElapsed();
+        intervalRef.current = setInterval(updateElapsed, 1000)
     }
 
     // Stop the timer and reset elapsed time.
@@ -70,7 +73,7 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
         // server truth 
         try {  
             const res = await api.get("/api/sessions/active");
-            const s = res.data.session as
+            const s = res.data.activeSession as
                     | {id: number; games_id: number; started_at: string}
                     | null;
 
