@@ -1,4 +1,3 @@
-import GameDetailsScreen from "@/components/GameDetailsScreen";
 import GameSessionCard from "@/components/GameSessionCard";
 import { Game, getGames } from "@/features/games/games.service";
 import { getApiErrorMessage } from "@/lib/api/apiClient";
@@ -12,33 +11,41 @@ const normalizeUrl = (url?: string | null) => {
   return url;
 };
 
-const minutesToHoursText = (minutes?: number | null) => {
-  const m =
-    typeof minutes === "number" && Number.isFinite(minutes) ? minutes : 0;
-  const h = m / 60;
-  return h % 1 === 0 ? `${h} hr` : `${h.toFixed(1)} hr`;
-};
+function formatPlaytime(hours?: number | string | null) {
+  const h = Number(hours || 0);
+
+  const totalMinutes = Math.round(h * 60);
+
+  const hoursPart = Math.floor(totalMinutes / 60);
+  const minutesPart = totalMinutes % 60;
+
+  const mm = String(minutesPart).padStart(2, "0");
+
+  return `${hoursPart}h ${mm}m`;
+}
 
 export default function GameDetailsRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [game, setGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
+  const loadGame = async () => {
+    try {
+      setLoading(true);
 
-        const data = await getGames();
-        const found =
-          (data.games || []).find((g) => String(g.id) === String(id)) || null;
-        setGame(found);
-      } catch (err) {
-        Alert.alert("Error", getApiErrorMessage(err));
-      } finally {
-        setLoading(false);
-      }
-    })();
+      const data = await getGames();
+      const found =
+        (data.games || []).find((g) => String(g.id) === String(id)) || null;
+      setGame(found);
+    } catch (err) {
+      Alert.alert("Error", getApiErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void loadGame();
   }, [id]);
 
   const imageUri = useMemo(
@@ -74,10 +81,10 @@ export default function GameDetailsRoute() {
         <Text style={styles.title}>{game.name}</Text>
 
         <Text style={styles.meta}>
-          Playtime: {minutesToHoursText(game.playtime_hours)}
+          Playtime: {formatPlaytime(game.playtime_hours)}
         </Text>
 
-        <GameSessionCard gameId={game.id} />
+        <GameSessionCard gameId={game.id} onSessionEnded={loadGame}/>
 
         {game.description ? (
           <Text style={styles.desc}>{game.description}</Text>
