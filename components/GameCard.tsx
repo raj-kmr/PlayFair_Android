@@ -9,7 +9,7 @@ export type GameCardItem = {
   id: string | number; // ID can be string or number (future-proof)
   name: string;
   image?: string | null; // optional Image
-  playtime_hours?: number | null; // stored in minutes currently
+  playtime_hours?: number | string | null; // value comes from backend in hours
 };
 
 /*
@@ -25,12 +25,18 @@ type Props = {
   onPress?: () => void;
 };
 
-const minutesToHoursText = (minutes?: number | null) => {
-  const m =
-    typeof minutes === "number" && Number.isFinite(minutes) ? minutes : 0;
-  const h = m / 60;
-  return h % 1 === 0 ? `${h} hr` : `${h.toFixed(1)} hr`;
-};
+function formatPlaytime(hours?: number | string | null) {
+  const h = Number(hours || 0);
+
+  const totalMinutes = Math.round(h * 60);
+
+  const hoursPart = Math.floor(totalMinutes / 60);
+  const minutesPart = totalMinutes % 60;
+
+  const mm = String(minutesPart).padStart(2, "0");
+
+  return `${hoursPart}h ${mm}m`;
+}
 
 export default function GameCard({ item, onDelete, rightSlot, onPress }: Props) {
   return (
@@ -49,9 +55,7 @@ export default function GameCard({ item, onDelete, rightSlot, onPress }: Props) 
 
         {/* Playtime Display */}
         <Text style={styles.meta} numberOfLines={1}>
-          {typeof item.playtime_hours === "number"
-            ? `Playtime: ${minutesToHoursText(item.playtime_hours)}`
-            : `Playtime: 0 min`}
+          {`Playtime: ${formatPlaytime(item.playtime_hours)}`}
         </Text>
 
             {/* Action area (Delete or custom slot) */}

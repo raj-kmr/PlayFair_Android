@@ -6,6 +6,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 type Props = {
   gameId: number;
+  onSessionEnded?:  () => Promise<void> | void;
 };
 
 function formatDuration(totalSeconds: number) {
@@ -22,7 +23,7 @@ function formatDuration(totalSeconds: number) {
   return `${hh}:${mm}:${ss}`;
 }
 
-export default function GameSessionCard({ gameId }: Props) {
+export default function GameSessionCard({ gameId, onSessionEnded }: Props) {
   const { activeSession, elapsedSeconds, startSession, endSession } = useSession();
 
   const [starting, setStarting] = useState(false);
@@ -50,6 +51,10 @@ export default function GameSessionCard({ gameId }: Props) {
       setEnding(true);
 
       const endedSession = await endSession();
+
+      if(onSessionEnded){
+        await onSessionEnded();
+      }
 
       Alert.alert(
         "Session Completed",

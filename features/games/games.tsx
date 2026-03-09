@@ -24,7 +24,7 @@ import GameList from "@/components/GameList";
 import * as ImagePicker from "expo-image-picker";
 import AddGameCard from "@/components/AddGameCard";
 import { searchIgdb } from "../igdb/igdb.service";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 type IgdbGame = {
   igdbId: number;
@@ -332,6 +332,12 @@ export default function GamesScreen() {
     loadGame,
   ]);
 
+  useFocusEffect(
+    useCallback(() => {
+      void loadGame();
+    }, [loadGame]),
+  );
+
   if (loading) {
     return (
       <View style={styles.center}>
@@ -544,10 +550,12 @@ export default function GamesScreen() {
         refreshing={refreshing}
         onRefresh={onRefresh}
         onDelete={onDelete}
-        onPressItem={(item) => router.push({
-          pathname: "/(tabs)/gamesList/[id]",
-          params: { id : String(item.id)}
-        })}
+        onPressItem={(item) =>
+          router.push({
+            pathname: "/(tabs)/gamesList/[id]",
+            params: { id: String(item.id) },
+          })
+        }
       />
 
       <View style={styles.fabWrap}>
