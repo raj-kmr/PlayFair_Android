@@ -1,5 +1,6 @@
+import TaskSection from "@/features/dashboard/components/TaskSection";
 import { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 
 export default function Index() {
   const [msg, setMsg] = useState("Loading..");
@@ -20,15 +21,46 @@ export default function Index() {
   }, []);
 
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Playfair App</Text>
-      <Text>{msg}</Text>
-    </View>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Text style={styles.title}>Dashboard</Text>
+      <View style={styles.card}>
+          <Text style={styles.cardTitle}>Welcome to Playfair</Text>
+          <Text style={styles.cardText}>Balance gaming with productivity</Text>
+      </View>
+
+      <TaskSection/>
+    </ScrollView>
   );
 }
+
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  content: {
+    padding: 16,
+    paddingBottom: 32,
+  },
+  title: {
+    color: "#000",
+    fontSize: 28,
+    fontWeight: "800",
+    marginBottom: 16,
+  },
+  card: {
+    backgroundColor: "#1e1e1e",
+    padding: 16,
+    borderRadius: 12,
+  },
+  cardTitle: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "700",
+  },
+  cardText: {
+    color: "#fff",
+    marginTop: 8,
+  },
+})
