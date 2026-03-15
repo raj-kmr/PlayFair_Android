@@ -1,4 +1,4 @@
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 import { DailyTask, DailyTaskStatusResponse } from "../task.types";
@@ -36,6 +36,12 @@ export default function TaskSection() {
       }
     })();
   }, [loadData]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadData();
+    }, [loadData])
+  )
 
   // pull to refresh function 
   const onRefresh = useCallback(async() => {

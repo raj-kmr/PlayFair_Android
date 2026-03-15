@@ -1,5 +1,6 @@
 import { DailyTask } from "@/features/dashboard/task.types";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons"
 
 type Props = {
   task: DailyTask;
@@ -16,7 +17,11 @@ export default function TaskItem({ task, onToggle, disabled }: Props) {
     >
       <View
         style={[styles.checkBox, task.isCompleted && styles.checkBoxActive]}
-      ></View>
+      >
+        {task.isCompleted && (
+          <Ionicons name="checkmark" size={18} color={"#fff"}/>
+        )}
+      </View>
       <View style={styles.content}>
         <Text style={[styles.title, task.isCompleted && styles.titleDone]}>
           {task.title}
@@ -39,8 +44,10 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 14,
     borderRadius: 12,
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
     marginBottom: 12,
+    borderColor: "#e5e5e5",
+    borderWidth: 1
   },
 
   checkBox: {
@@ -48,13 +55,15 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#1a1a1a",
+    borderColor: "#000",
     marginTop: 2,
+    alignItems: "center",
+    justifyContent: "center"
   },
 
   checkBoxActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
+    backgroundColor: "#000",
+    borderColor: "#000",
   },
 
   content: {
@@ -62,7 +71,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: "#fff",
+    color: "#000",
     fontSize: 16,
     fontWeight: "600",
   },
@@ -73,14 +82,14 @@ const styles = StyleSheet.create({
   },
 
   category: {
-    color: "#fff",
+    color: "#000",
     marginTop: 4,
     fontSize: 12,
     textTransform: "capitalize",
   },
 
   description: {
-    color: "#fff",
+    color: "#000",
     marginTop: 6,
     fontSize: 13,
   },

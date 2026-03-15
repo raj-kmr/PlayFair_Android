@@ -9,7 +9,7 @@ import {
 
 // Send request to backend to create a new task
 export async function createTask(payload: CreateTaskPayload): Promise<Task> {
-  const { data } = await api.post("/tasks", payload);
+  const { data } = await api.post("/api/tasks", payload);
 
   return data.task;
 }
@@ -18,21 +18,30 @@ export async function createTask(payload: CreateTaskPayload): Promise<Task> {
 export async function getTasks(active?: boolean): Promise<Task[]> {
   const query = typeof active === "boolean" ? `?active=${active}` : "";
 
-  const { data } = await api.get(`/tasks${query}`);
+  const { data } = await api.get(`/api/tasks${query}`);
 
   return data.tasks || [];
 }
 
 // Fetch completeion of tasks for a specific day
-export async function getDailyTaskStatus(date: string) : Promise<DailyTaskStatusResponse> {
-    const { data } = await api.get(`/tasks/daily-status?date=${date}`)
+export async function getDailyTaskStatus(
+  date: string,
+): Promise<DailyTaskStatusResponse> {
+  const { data } = await api.get(`/api/tasks/daily-status?date=${date}`);
 
-    return data;
+  return data;
 }
 
 // Mark task as completed / skipped / etc for a specific day
-export async function updateDailyTaskStatus(taskId: number, payload: UpdateDailyStatusPayload) {
-    const {data} = await api.patch(`/tasks/${taskId}/daily-status`, payload)
+export async function updateDailyTaskStatus(
+  taskId: number,
+  payload: UpdateDailyStatusPayload,
+) {
+  console.log("UPDATING TASK STATUS", { taskId, payload });
+  const { data } = await api.patch(
+    `/api/tasks/${taskId}/daily-status`,
+    payload,
+  );
 
-    return data.status;
+  return data.status;
 }

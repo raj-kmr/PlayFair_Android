@@ -9,8 +9,10 @@ import {
 } from "react-native";
 import { createTask } from "./task.service";
 import { getApiErrorMessage } from "@/lib/api/apiClient";
+import { useRouter } from "expo-router";
 
 export default function CreateTaskScreen({ navigation }: any) {
+  const router = useRouter()
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("custom");
@@ -19,6 +21,7 @@ export default function CreateTaskScreen({ navigation }: any) {
   const onSubmit = async () => {
     if (!title.trim()) {
       Alert.alert("Validation", "Title is required");
+      router.back()
       return;
     }
 
@@ -31,7 +34,7 @@ export default function CreateTaskScreen({ navigation }: any) {
         frequency: "daily",
       });
       Alert.alert("Success", "Task created successfully");
-      navigation.goBack();
+      router.back();
     } catch (err) {
       Alert.alert("Error", getApiErrorMessage(err));
     } finally {
