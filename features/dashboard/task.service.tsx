@@ -44,3 +44,13 @@ export async function updateDailyTaskStatus(
 
   return data.status;
 }
+
+export async function updateTask(taskId: number, payload: CreateTaskPayload): Promise<Task> {
+  const { data } = await api.patch(`/api/tasks/${taskId}`, payload)
+  return data.task;
+}
+
+export async function deleteTask(taskId: number){
+  const { data } = await api.delete(`/api/tasks/${taskId}`)
+  return data;
+}

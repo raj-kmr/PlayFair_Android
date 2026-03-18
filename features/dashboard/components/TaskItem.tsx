@@ -5,15 +5,18 @@ import { Ionicons } from "@expo/vector-icons"
 type Props = {
   task: DailyTask;
   onToggle: (task: DailyTask) => void;
+  onLongPress?: (task: DailyTask) => void;
   disabled?: boolean;
 };
 
-export default function TaskItem({ task, onToggle, disabled }: Props) {
+export default function TaskItem({ task, onToggle, disabled, onLongPress }: Props) {
   return (
     <Pressable
       style={styles.container}
       onPress={() => onToggle(task)}
       disabled={disabled}
+      onLongPress={() => onLongPress?.(task)}
+      delayLongPress={250}
     >
       <View
         style={[styles.checkBox, task.isCompleted && styles.checkBoxActive]}

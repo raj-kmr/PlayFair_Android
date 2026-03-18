@@ -44,7 +44,7 @@ export default function CreateTaskScreen({ navigation }: any) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>Task title</Text>
+      <Text style={styles.label}>Habit title</Text>
       <TextInput
         value={title}
         onChangeText={setTitle}
@@ -87,7 +87,7 @@ export default function CreateTaskScreen({ navigation }: any) {
 
       <Pressable style={styles.button} onPress={onSubmit} disabled={loading}>
         <Text style={styles.buttonText}>
-          {loading ? "Creating..." : "Create Task"}
+          {loading ? "Creating..." : "Create Habit"}
         </Text>
       </Pressable>
     </View>

@@ -13,6 +13,7 @@ import {
 import { DailyTask, DailyTaskStatusResponse } from "../task.types";
 import { getTodayDateString } from "@/lib/date";
 import {
+  deleteTask,
   getDailyTaskStatus,
   updateDailyTaskStatus,
 } from "../task.service";
@@ -121,6 +122,65 @@ export default function TaskSection() {
     );
   }
 
+  const onDelete = async (task: DailyTask) => {
+    const previous = data;
+    if(!data) return;
+
+    const nextTasks = data.tasks.filter((item) => item.id !== task.id);
+    const total = nextTasks.length;
+    const completed = nextTasks.filter((item) => item.isCompleted).length
+    const percentage = total === 0? 0 : Math.round((completed / total) * 100)
+
+    setData({
+      ...data,
+      tasks: nextTasks,
+      summary: {
+        total,
+        completed,
+        percentage
+      }
+    })
+
+    try{
+      await deleteTask(task.id)
+    } catch(err) {
+      setData(previous)
+      Alert.alert("Error", getApiErrorMessage(err))
+    }
+  }
+
+  const onTaskOptions = (task: DailyTask) => {
+    Alert.alert(
+      task.title,
+      "Choose an option",
+      [
+        {
+          text: "Edit",
+          onPress: () => 
+            router.push({
+              pathname: "/edit-task/[id]",
+              params: {
+                id: String(task.id),
+                title: task.title,
+                description: task.description || "",
+                category: task.category || "custom",
+                frequency: task.frequency || "daily"
+              }
+            })
+        },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => onDelete(task),
+        },
+        {
+          text: "Cancel",
+          style: "cancel"
+        }
+      ]
+    )
+  }
+
   const pendingTasks = (data?.tasks || []).filter((task) => !task.isCompleted);
   const completedTasks = (data?.tasks || []).filter((task) => task.isCompleted);
 
@@ -186,6 +246,7 @@ export default function TaskSection() {
                     task={item}
                     onToggle={onToggle}
                     disabled={submittingId === item.id}
+                    onLongPress={onTaskOptions}
                   />
                 ))}
               </View>
