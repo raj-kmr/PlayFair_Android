@@ -12,7 +12,10 @@ import {
 } from "react-native";
 import { DailyTask, DailyTaskStatusResponse } from "../task.types";
 import { getTodayDateString } from "@/lib/date";
-import { getDailyTaskStatus, updateDailyTaskStatus } from "../task.service";
+import {
+  getDailyTaskStatus,
+  updateDailyTaskStatus,
+} from "../task.service";
 import { getApiErrorMessage } from "@/lib/api/apiClient";
 import ProgressHeader from "./ProcessHeader";
 import TaskItem from "./TaskItem";
@@ -125,7 +128,7 @@ export default function TaskSection() {
     <View style={styles.section}>
       {/* Header */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionTitle}>Today's Tasks</Text>
+        <Text style={styles.sectionTitle}>Today's Habits</Text>
 
         <Pressable onPress={() => router.push("/create-task")}>
           <Text style={styles.addText}>+ Add</Text>
@@ -166,9 +169,9 @@ export default function TaskSection() {
       <View style={styles.listContent}>
         {!pendingTasks.length && !completedTasks.length ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No tasks yet</Text>
+            <Text style={styles.emptyTitle}>No habits yet</Text>
             <Text style={styles.emptyText}>
-              Add your first task to start unlocking game time.
+              Add your first habit to start unlocking game time.
             </Text>
           </View>
         ) : (
@@ -293,5 +296,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: "#000",
     fontWeight: "600",
+  },
+
+  completedLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+
+  clearText: {
+    color: "#ef4444",
+    fontWeight: "600",
+    fontSize: 14,
   },
 });
