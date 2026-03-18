@@ -37,7 +37,6 @@ export async function updateDailyTaskStatus(
   taskId: number,
   payload: UpdateDailyStatusPayload,
 ) {
-  console.log("UPDATING TASK STATUS", { taskId, payload });
   const { data } = await api.patch(
     `/api/tasks/${taskId}/daily-status`,
     payload,

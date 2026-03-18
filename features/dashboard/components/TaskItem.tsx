@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: "#000",
+    color: "#111",
     fontSize: 16,
     fontWeight: "600",
   },
@@ -82,14 +82,14 @@ const styles = StyleSheet.create({
   },
 
   category: {
-    color: "#000",
+    color: "#666",
     marginTop: 4,
     fontSize: 12,
     textTransform: "capitalize",
   },
 
   description: {
-    color: "#000",
+    color: "#888",
     marginTop: 6,
     fontSize: 13,
   },
