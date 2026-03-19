@@ -9,30 +9,34 @@ import {
 } from "react-native";
 import { createTask } from "./task.service";
 import { getApiErrorMessage } from "@/lib/api/apiClient";
-import { useRouter } from "expo-router";
+import { useRouter, useLocalSearchParams } from "expo-router";
+import { updateTask } from "./task.service";
 
 export default function CreateTaskScreen({ navigation }: any) {
+  const params = useLocalSearchParams();
   const router = useRouter()
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("custom");
+  const [title, setTitle] = useState(params.title?.toString() || "");
+  const [description, setDescription] = useState(params.description?.toString() || "");
+  const [category, setCategory] = useState(params.category?.toString() || "custom");
   const [loading, setLoading] = useState(false);
+
+  const taskId = Number(params.id);
 
   const onSubmit = async () => {
     if (!title.trim()) {
       Alert.alert("Validation", "Title is required");
-      router.back()
+      // router.back()
       return;
     }
 
     try {
       setLoading(true);
-      await createTask({
+      await updateTask(taskId, {
         title: title.trim(),
         description: description.trim(),
         category,
-        frequency: "daily",
-      });
+        frequency: "daily"
+      })
       Alert.alert("Success", "Task created successfully");
       router.back();
     } catch (err) {
@@ -87,7 +91,7 @@ export default function CreateTaskScreen({ navigation }: any) {
 
       <Pressable style={styles.button} onPress={onSubmit} disabled={loading}>
         <Text style={styles.buttonText}>
-          {loading ? "Creating..." : "Create Habit"}
+          {loading ? "Editing..." : "Edit Habit"}
         </Text>
       </Pressable>
     </View>
