@@ -1,4 +1,5 @@
 import { SessionProvider } from "@/context/SessionContext";
+import { UnlockProvider } from "@/context/UnlockContext";
 import { AuthProvider, useAuth } from "@/features/auth/AuthContext";
 import { Stack } from "expo-router";
 
@@ -15,7 +16,7 @@ export function RootNavigator() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Protected guard={isAuthenticated}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="create-task"/>
+        <Stack.Screen name="create-task" />
       </Stack.Protected>
       <Stack.Protected guard={!isAuthenticated}>
         <Stack.Screen name="(auth)" />
@@ -26,10 +27,12 @@ export function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <SessionProvider>
-      <AuthProvider>
-        <RootNavigator />
-      </AuthProvider>
-    </SessionProvider>
+    <UnlockProvider>
+      <SessionProvider>
+        <AuthProvider>
+          <RootNavigator />
+        </AuthProvider>
+      </SessionProvider>
+    </UnlockProvider>
   );
 }

@@ -1,12 +1,16 @@
 // components/GameSessionCard.tsx
 import { useSession } from "@/context/SessionContext";
+import { useUnlock } from "@/context/UnlockContext";
 import { getApiErrorMessage } from "@/lib/api/apiClient";
 import { useMemo, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import UnlockRuleCard from "./unlock/UnlockRuleCard";
+import AvailableTimeCard from "./unlock/AvailableTimeCard";
+import UnlockProgressBar from "./unlock/UnlockProgressBar";
 
 type Props = {
   gameId: number;
-  onSessionEnded?:  () => Promise<void> | void;
+  onSessionEnded?: () => Promise<void> | void;
 };
 
 function formatDuration(totalSeconds: number) {
@@ -24,7 +28,8 @@ function formatDuration(totalSeconds: number) {
 }
 
 export default function GameSessionCard({ gameId, onSessionEnded }: Props) {
-  const { activeSession, elapsedSeconds, startSession, endSession } = useSession();
+  const { activeSession, elapsedSeconds, startSession, endSession } =
+    useSession();
 
   const [starting, setStarting] = useState(false);
   const [ending, setEnding] = useState(false);
@@ -34,6 +39,9 @@ export default function GameSessionCard({ gameId, onSessionEnded }: Props) {
   }, [activeSession, gameId]);
 
   const hasAnyActiveSession = !!activeSession;
+
+  const { unlockData, refreshUnlock } = useUnlock();
+  const isLocked = !unlockData || unlockData.availableMinutes <= 0;
 
   const handleStart = async () => {
     try {
@@ -51,14 +59,15 @@ export default function GameSessionCard({ gameId, onSessionEnded }: Props) {
       setEnding(true);
 
       const endedSession = await endSession();
+      await refreshUnlock();
 
-      if(onSessionEnded){
+      if (onSessionEnded) {
         await onSessionEnded();
       }
 
       Alert.alert(
         "Session Completed",
-        `You played for ${formatDuration(endedSession?.durationSeconds || 0)}`
+        `You played for ${formatDuration(endedSession?.durationSeconds || 0)}`,
       );
     } catch (error) {
       Alert.alert("Error", getApiErrorMessage(error));
@@ -78,16 +87,29 @@ export default function GameSessionCard({ gameId, onSessionEnded }: Props) {
           </Text>
 
           <Pressable
-            style={[styles.button, styles.startButton, starting && styles.disabled]}
+            style={[
+              styles.button,
+              styles.startButton,
+              starting && styles.disabled,
+            ]}
             onPress={handleStart}
-            disabled={starting}
+            disabled={isLocked}
           >
             <Text style={styles.buttonText}>
-              {starting ? "Starting..." : "Start Playing"}
+              {isLocked ? "Locked 🔒" : "Start Playing"}
             </Text>
           </Pressable>
         </>
       )}
+
+      {isLocked && (
+        <Text style={{ color: "red", marginTop: 10 }}>
+          No gaming time available. Complete tasks to unlock.
+        </Text>
+      )}
+      <UnlockRuleCard/>
+      <AvailableTimeCard/>
+      <UnlockProgressBar/>
 
       {isCurrentGameActive && (
         <>
@@ -95,7 +117,11 @@ export default function GameSessionCard({ gameId, onSessionEnded }: Props) {
           <Text style={styles.timer}>{formatDuration(elapsedSeconds)}</Text>
 
           <Pressable
-            style={[styles.button, styles.stopButton, ending && styles.disabled]}
+            style={[
+              styles.button,
+              styles.stopButton,
+              ending && styles.disabled,
+            ]}
             onPress={handleEnd}
             disabled={ending}
           >

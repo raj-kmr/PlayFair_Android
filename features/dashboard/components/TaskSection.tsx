@@ -21,6 +21,7 @@ import { getApiErrorMessage } from "@/lib/api/apiClient";
 import ProgressHeader from "./ProcessHeader";
 import TaskItem from "./TaskItem";
 import { Ionicons } from "@expo/vector-icons";
+import { useUnlock } from "@/context/UnlockContext";
 
 export default function TaskSection() {
   const router = useRouter();
@@ -30,6 +31,7 @@ export default function TaskSection() {
   const [data, setData] = useState<DailyTaskStatusResponse | null>(null);
   const [showCompleted, setShowCompleted] = useState(false);
   const today = getTodayDateString();
+  const { refreshUnlock } = useUnlock();
 
   // function to load tasks from backend
   const loadData = useCallback(async () => {
@@ -104,6 +106,7 @@ export default function TaskSection() {
           date: today,
           isCompleted: !task.isCompleted,
         });
+        await refreshUnlock();
       } catch (err) {
         setData(previous);
         Alert.alert("Error", getApiErrorMessage(err));
