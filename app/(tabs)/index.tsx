@@ -38,6 +38,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+    borderWidth: 1,
+    borderColor: "#ff0000"
   },
   content: {
     padding: 16,

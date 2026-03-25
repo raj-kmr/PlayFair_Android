@@ -2,6 +2,8 @@ import { SessionProvider } from "@/context/SessionContext";
 import { UnlockProvider } from "@/context/UnlockContext";
 import { AuthProvider, useAuth } from "@/features/auth/AuthContext";
 import { Stack } from "expo-router";
+import "../global.css";
+
 
 export function RootNavigator() {
   const { isAuthenticated } = useAuth();
