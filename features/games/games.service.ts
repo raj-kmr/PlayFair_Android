@@ -54,7 +54,6 @@ export const uploadGameImage = async (imageUri: string) => {
 };
 
 export const getGames = async () => {
-  console.log("Calling get Games");
   const { data } = await api.get<GameResponse>(endPoints.games.getGames);
   return data;
 };

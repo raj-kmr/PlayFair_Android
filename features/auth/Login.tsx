@@ -17,7 +17,7 @@ export const Login = () => {
      await login({email, password})
      alert("Login successful")
     } catch (err) {
-      console.log(err);
+      console.error(err);
       alert(getApiErrorMessage(err));
     }
   };

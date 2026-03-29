@@ -11,7 +11,6 @@ export const api = axios.create({
 
 // Request interceptor that auto attachs token to every request
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-    console.log("➡️", config.method?.toUpperCase(), (config.baseURL || "") + (config.url || ""));
     const token = await tokenStore.get()
     if(token) config.headers.Authorization = `Bearer ${token}`
     return config

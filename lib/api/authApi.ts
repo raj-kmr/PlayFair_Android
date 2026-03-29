@@ -21,7 +21,6 @@ export type AuthResponse = {
 export const signin = async (body: SigninBody) => {
     const { data } = await api.post<AuthResponse>(endPoints.auth.signin, body)
 
-    console.log("Setting this token: ", data.token)
     await tokenStore.set(data.token)
     return data
 }

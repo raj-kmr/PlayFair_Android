@@ -40,7 +40,7 @@ export function UnlockProvider ({children}: Props) {
             setRule(ruleRes.data);
             setUnlockData(dataRes.data);
         } catch(err) {
-            console.log("Unlock fetch error: ", err)
+            console.error("Unlock fetch error: ", err)
         } finally {
             setLoading(false)
         }

@@ -11,7 +11,7 @@ export default function Index() {
       const data = await res.json();
       setMsg(data.message);
     } catch (err) {
-      console.log(err);
+      console.error(err);
       setMsg("Error whiile connecting");
     }
   };

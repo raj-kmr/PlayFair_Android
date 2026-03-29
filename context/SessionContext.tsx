@@ -90,7 +90,7 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
             startTicker(next.startedAt);
         } catch(error) {
             // If server call fails, keep local session to avoid breaking UX
-            console.log("Hydrate failed", error);
+            console.error("Hydrate failed", error);
         }
     }
 

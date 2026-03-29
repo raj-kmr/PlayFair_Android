@@ -135,7 +135,6 @@ export default function GamesScreen() {
   };
 
   const loadGame = useCallback(async () => {
-    console.log("Calling getGames");
     const data = await getGames();
     setGames(data.games || []);
     setTotalPlaytime(

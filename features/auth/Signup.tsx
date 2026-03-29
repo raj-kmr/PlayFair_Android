@@ -16,13 +16,10 @@ export const Signup = () => {
       await signup({username, email, password})
       alert("User Account created Successfully")
     } catch(err) {
-      console.log("Signup error:  ", err)
+      console.error("Signup error:  ", err)
       alert(getApiErrorMessage(err))
     }
 
-    // await SecureStore.setItemAsync("email", email);
-    // console.log("Key value saved");
-  };
 
   return (
     <ScrollView contentInsetAdjustmentBehavior="automatic">
