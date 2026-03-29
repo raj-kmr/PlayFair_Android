@@ -1,14 +1,15 @@
 import TaskSection from "@/features/dashboard/components/TaskSection";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { api } from "@/lib/api/apiClient";
 
 export default function Index() {
   const [msg, setMsg] = useState("Loading..");
 
   const backendConnecting = async () => {
     try {
-      const res = await fetch("http://192.168.1.13:3000/test");
-      const data = await res.json();
+      const res = await api.get("/test");
+      const data = await res.data();
       setMsg(data.message);
     } catch (err) {
       console.error(err);

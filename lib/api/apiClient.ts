@@ -4,7 +4,7 @@ import { tokenStore } from "./tokenStore"
 
 // Axios instance of baseUrl and Json defaults
 export const api = axios.create({
-    baseURL: "http://192.168.1.13:3000",
+    baseURL: process.env.EXPO_PUBLIC_API_URL,
     timeout: 15000,
     headers: {"Content-Type": "application/json"}
 })

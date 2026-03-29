@@ -20,6 +20,7 @@ export const Signup = () => {
       alert(getApiErrorMessage(err))
     }
 
+  };
 
   return (
     <ScrollView contentInsetAdjustmentBehavior="automatic">
