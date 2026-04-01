@@ -3,7 +3,7 @@ import { UnlockProvider } from "@/context/UnlockContext";
 import { AuthProvider, useAuth } from "@/features/auth/AuthContext";
 import { Stack } from "expo-router";
 import "../global.css";
-
+import { Provider as PaperProvider } from "react-native-paper";
 
 export function RootNavigator() {
   const { isAuthenticated } = useAuth();
@@ -29,12 +29,14 @@ export function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <UnlockProvider>
-      <SessionProvider>
-        <AuthProvider>
-          <RootNavigator />
-        </AuthProvider>
-      </SessionProvider>
-    </UnlockProvider>
+    <PaperProvider>
+      <UnlockProvider>
+        <SessionProvider>
+          <AuthProvider>
+            <RootNavigator />
+          </AuthProvider>
+        </SessionProvider>
+      </UnlockProvider>
+    </PaperProvider>
   );
 }

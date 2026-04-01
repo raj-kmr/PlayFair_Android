@@ -9,7 +9,7 @@ export default function Index() {
   const backendConnecting = async () => {
     try {
       const res = await api.get("/test");
-      const data = await res.data();
+      const data = await res.data;
       setMsg(data.message);
     } catch (err) {
       console.error(err);
