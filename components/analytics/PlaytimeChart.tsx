@@ -3,18 +3,27 @@ import { LineChart } from "react-native-chart-kit";
 
 const screenWidth = Dimensions.get("window").width;
 
+interface ChartDataPoint {
+  day: string;
+  minutes: number;
+}
+
+interface Props {
+  data: ChartDataPoint[];
+}
+
 // Reusable chart component
-export default function PlaytimeChart({ data }: any) {
+export default function PlaytimeChart({ data }: Props) {
   const safeData = data.filter(
-    (d: any) =>
+    (d) =>
       d &&
       typeof d.minutes === "number" &&
       !isNaN(d.minutes) &&
       isFinite(d.minutes),
   );
 
-  const labels = safeData.map((d: any) => d.day?.slice(5) || "X");
-  const values = safeData.map((d: any) => d.minutes);
+  const labels = safeData.map((d) => d.day?.slice(5) || "X");
+  const values = safeData.map((d) => d.minutes);
 
   if (values.length === 0) {
     return null;
