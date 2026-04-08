@@ -3,10 +3,21 @@ import SectionHeader from "@/components/analytics/SectionHeader";
 import StatCard from "@/components/analytics/StatCard";
 import TaskCompletionCard from "@/components/analytics/TaskCompletionCard";
 import { useAnalytics } from "@/hooks/useAnalytics";
-import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
+import React, { useState } from "react";
+import Skeleton from "@/components/Skeleton";
+import TimeRangeSelector from "@/components/TimeRangeSelector";
 
 export default function AnalyticsScreen() {
-  const { loading, error, playtime, sessions, tasks } = useAnalytics();
+  const [timeRange, setTimeRange] = useState<'7d' | '30d'>('7d');
+  const [refreshing, setRefreshing] = useState(false);
+  const { loading, error, playtime, sessions, tasks, refetch } = useAnalytics(timeRange);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  };
 
   const normalizeWeeklyData = (data: any[]) => {
     return data.map((d) => ({
@@ -15,10 +26,48 @@ export default function AnalyticsScreen() {
     }));
   };
 
-if (loading) {
+  const normalizeMonthlyData = (data: any[]) => {
+    return data.map((d) => ({
+      week: d.week,
+      minutes: Number(d.minutes) || 0
+    }));
+  };
+
+  // Calculate trend indicators (up/down from last week)
+  const getTrend = (current: number, previous: number): 'up' | 'down' | null => {
+    if (current > previous) return 'up';
+    if (current < previous) return 'down';
+    return null;
+  };
+
+   const playtimeTrend = playtime?.previous_total_minute !== undefined 
+     ? getTrend(playtime?.total_minute || 0, playtime.previous_total_minute) 
+     : null;
+    
+  const sessionsTrend = sessions?.previous_week_sessions !== undefined 
+    ? getTrend(sessions?.total_sessions || 0, sessions.previous_week_sessions) 
+    : null;
+
+if (loading && !refreshing) {
   return (
-    <View style={styles.loader}>
-      <ActivityIndicator size="large" color="#00ff99" />
+    <View style={styles.container}>
+      <SectionHeader title="Overview" />
+
+      <View style={styles.row}>
+        <StatCard title="Total minutes" value={<Skeleton width={80} height={24} borderRadius={4} />} />
+        <StatCard title="Sessions" value={<Skeleton width={60} height={24} borderRadius={4} />} />
+      </View>
+
+      <View style={styles.row}>
+        <StatCard title="Avg Session" value={<Skeleton width={80} height={24} borderRadius={4} />} />
+        <StatCard title="Max Session" value={<Skeleton width={80} height={24} borderRadius={4} />} />
+      </View>
+
+      <SectionHeader title="Weekly Playtime" />
+      <Skeleton width="100%" height={200} borderRadius={10} margin={10} />
+
+      <SectionHeader title="Productivity (Last 7 Days)" />
+      <Skeleton width="100%" height={100} borderRadius={10} margin={10} />
     </View>
   );
 }
@@ -47,44 +96,76 @@ if (hasNoData) {
   );
 }
 
-  return (
-    <View style={styles.container}>
-      {/* Total Playtime */}
-      <SectionHeader title="Overview" />
+   return (
+     <ScrollView
+       style={styles.container}
+       refreshControl={
+         <RefreshControl
+           refreshing={refreshing}
+           onRefresh={onRefresh}
+         />
+       }
+     >
+         <View style={{ marginBottom: 10 }}>
+           <TimeRangeSelector 
+             selectedRange={timeRange} 
+             onRangeChange={setTimeRange} 
+           />
+         </View>
+       
+       {/* Total Playtime */}
+       <SectionHeader title="Overview" />
 
-      <View style={styles.row}>
-        <StatCard title="Total minutes" value={playtime?.total_minute || 0} />
-        <StatCard title="Sessions" value={sessions?.total_sessions || 0} />
-      </View>
+       <View style={styles.row}>
+         <StatCard title="Minutes" value={playtime?.total_minute || 0} trend={playtimeTrend} />
+         <StatCard title="Sessions" value={sessions?.total_sessions || 0} trend={sessionsTrend} />
+       </View>
 
-      <View style={styles.row}>
-        <StatCard
-          title="Avg Session"
-          value={
-            isFinite(sessions?.avg_session_minutes)
-              ? Math.round(sessions.avg_session_minutes)
-              : 0
-          }
-        />
+<View style={styles.row}>
+  <StatCard
+    title="Avg Session"
+    value={
+      isFinite(sessions?.avg_session_minutes)
+        ? Math.round(sessions.avg_session_minutes)
+        : 0
+    }
+  />
+  <StatCard
+    title="Max Session"
+    value={sessions?.max_session_minutes || 0}
+  />
+</View>
 
-        <StatCard
-          title="Max Session"
-          value={sessions?.max_session_minutes || 0}
-        />
-      </View>
 
-      {/* Weekly chart */}
-      <SectionHeader title="Weekly Playtime" />
-      <PlaytimeChart data={normalizeWeeklyData(playtime?.weekly || [])} />
+        {/* Playtime chart */}
+        <SectionHeader title={`${timeRange === '7d' ? 'Weekly' : 'Monthly'} Playtime`} />
+        {timeRange === '7d' ? (
+          playtime?.weekly && playtime.weekly.length > 0 ? (
+            <PlaytimeChart data={normalizeWeeklyData(playtime.weekly)} />
+          ) : (
+            <View style={{ height: 200, backgroundColor: '#f5f5f5', borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginVertical: 10 }}>
+              <Text style={{ color: '#666', fontSize: 14 }}>No weekly data available</Text>
+            </View>
+          )
+        ) : (
+          playtime?.monthly && playtime.monthly.length > 0 ? (
+            <PlaytimeChart data={normalizeMonthlyData(playtime.monthly)} />
+          ) : (
+            <View style={{ height: 200, backgroundColor: '#f5f5f5', borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginVertical: 10 }}>
+              <Text style={{ color: '#666', fontSize: 14 }}>No monthly data available</Text>
+            </View>
+          )
+        )}
 
       {/* Task chart */}
-      <SectionHeader title="Productivity (Last 7 Days)" />
+      <SectionHeader title={`Productivity (${timeRange === '7d' ? 'Last 7 Days' : 'Last 30 Days'})`} />
       <TaskCompletionCard 
         percentage={tasks?.percentage || 0} 
         completed={tasks?.completed || 0}
         total={tasks?.total || 0}
+        timeRange={timeRange}
       />
-    </View>
+    </ScrollView>
   );
 }
 

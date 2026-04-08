@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export const tracking = () => {
   return (
       <ScrollView style={{flex: 1, backgroundColor: "#fff", marginTop: 20}} contentContainerStyle={styles.container}>
-        <Text className=" bg-red-900" style={styles.title}>Work and Game Time Tracking</Text>
+        <Text  style={styles.title}>Work and Game Time Tracking</Text>
         <AnalyticsScreen />
       </ScrollView>
   );

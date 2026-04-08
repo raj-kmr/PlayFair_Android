@@ -4,20 +4,24 @@ interface Props {
   percentage: number;
   completed?: number;
   total?: number;
+  timeRange?: '7d' | '30d';
 }
 
-export default function TaskCompletionCard({ percentage, completed, total }: Props) {
+export default function TaskCompletionCard({ percentage, completed, total, timeRange = '7d' }: Props) {
+  const timeRangeText = timeRange === '7d' ? 'Last 7 days' : 'Last 30 days';
+  
   return (
-  <View style={styles.container}>
-    <Text style={styles.value}>{percentage.toFixed(0)}%</Text>
-    <Text style={styles.label}>Task completion</Text>
-    {total !== undefined && (
-      <Text style={styles.subtext}>
-        {completed} / {total} tasks (Last 7 days)
-      </Text>
-    )}
-  </View>
-  )}
+    <View style={styles.container}>
+      <Text style={styles.value}>{percentage.toFixed(0)}%</Text>
+      <Text style={styles.label}>Task completion</Text>
+      {total !== undefined && (
+        <Text style={styles.subtext}>
+          {completed} / {total} tasks ({timeRangeText})
+        </Text>
+      )}
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {

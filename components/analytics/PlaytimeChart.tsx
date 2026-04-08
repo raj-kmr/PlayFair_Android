@@ -3,8 +3,9 @@ import { LineChart } from "react-native-chart-kit";
 
 const screenWidth = Dimensions.get("window").width;
 
-interface ChartDataPoint {
-  day: string;
+type ChartDataPoint = {
+  day?: string;
+  week?: string;
   minutes: number;
 }
 
@@ -22,7 +23,7 @@ export default function PlaytimeChart({ data }: Props) {
       isFinite(d.minutes),
   );
 
-  const labels = safeData.map((d) => d.day?.slice(5) || "X");
+  const labels = safeData.map((d) => d.day?.slice(5, 10) || "X");
   const values = safeData.map((d) => d.minutes);
 
   if (values.length === 0) {

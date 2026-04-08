@@ -1,14 +1,24 @@
 import { StyleSheet, Text, View } from "react-native"
+import type { ReactNode } from "react"
 
 interface Props {
     title: string,
-    value: string | number
+    value: string | number | ReactNode,
+    trend?: 'up' | 'down' | null
 }
 
-export default function StatCard({title, value}: Props) {
+export default function StatCard({title, value, trend = null}: Props) {
     return (
         <View style={styles.card}>
-            <Text style={styles.value}>{value}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+                <Text style={styles.value}>{value}</Text>
+                {trend === 'up' && (
+                    <Text style={{ color: '#00C853', marginLeft: 4, fontSize: 16 }}>&uparrow;</Text>
+                )}
+                {trend === 'down' && (
+                    <Text style={{ color: '#ff4444', marginLeft: 4, fontSize: 16 }}>&downarrow;</Text>
+                )}
+            </View>
             <Text style={styles.label}>{title}</Text>
         </View>
     )
