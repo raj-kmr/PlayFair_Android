@@ -5,6 +5,7 @@ import { getApiErrorMessage } from "@/lib/api/apiClient";
 
 export const useAnalytics = ()  => {
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     const [playtime, setPlaytime] = useState<any>(null)
     const [sessions, setSessions] = useState<any>(null)
     const [tasks, setTasks] = useState<any>(null)
@@ -12,8 +13,9 @@ export const useAnalytics = ()  => {
     const fetchAnalytics = async () => {
         try {
             setLoading(true);
+            setError(null);
 
-            // Run all API calls in Parallel (faster)
+            // Run all API calls in parallel (faster)
             const [p, s, t] = await Promise.all([
                 getPlaytimeAnalytics(),
                 getSessionStats(),
@@ -24,7 +26,9 @@ export const useAnalytics = ()  => {
             setSessions(s);
             setTasks(t);
         } catch(err){
-            console.error("Analytics fetch error: ", getApiErrorMessage(err))
+            const errorMsg = getApiErrorMessage(err);
+            console.error("Analytics fetch error: ", errorMsg);
+            setError(errorMsg);
         } finally{
             setLoading(false);
         }
@@ -34,5 +38,5 @@ export const useAnalytics = ()  => {
         fetchAnalytics()
     }, []);
     
-    return {loading, playtime, sessions, tasks, refetch: fetchAnalytics}
+    return {loading, error, playtime, sessions, tasks, refetch: fetchAnalytics}
 }
