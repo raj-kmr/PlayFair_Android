@@ -12,13 +12,13 @@ export const useAnalytics = (timeRange: '7d' | '30d' = '7d')  => {
     const [sessions, setSessions] = useState<any>(null)
     const [tasks, setTasks] = useState<any>(null)
 
-    const fetchAnalytics = useCallback(async (useCache = true) => {
+    const fetchAnalytics = useCallback(async (useCache = true, forceRefresh = false) => {
         try {
             setLoading(true);
             setError(null);
 
-            // Try to get cached data first
-            if (useCache) {
+            // Try to get cached data first (skip if forceRefresh)
+            if (useCache && !forceRefresh) {
                 const cachedData = await AsyncStorage.getItem(`@analytics_data_${timeRange}`);
                 if (cachedData) {
                     const parsedData = JSON.parse(cachedData);
@@ -67,5 +67,5 @@ export const useAnalytics = (timeRange: '7d' | '30d' = '7d')  => {
         fetchAnalytics()
     }, [timeRange, fetchAnalytics])
     
-    return {loading, error, playtime, sessions, tasks, refetch: fetchAnalytics}
+    return {loading, error, playtime, sessions, tasks, refetch: (forceRefresh = false) => fetchAnalytics(true, forceRefresh)}
 }

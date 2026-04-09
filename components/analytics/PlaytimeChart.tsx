@@ -7,7 +7,7 @@ type ChartDataPoint = {
   day?: string;
   week?: string;
   minutes: number;
-}
+};
 
 interface Props {
   data: ChartDataPoint[];
@@ -24,7 +24,10 @@ export default function PlaytimeChart({ data }: Props) {
   );
 
   const labels = safeData.map((d) => d.day?.slice(5, 10) || "X");
-  const values = safeData.map((d) => d.minutes);
+  const values = safeData.map((d) => d.minutes > 0 ? d.minutes : 0.1);
+
+  // console.log("Chart Values:", values);
+  // console.log("Chart Labels:", labels);
 
   if (values.length === 0) {
     return null;
@@ -42,9 +45,9 @@ export default function PlaytimeChart({ data }: Props) {
         backgroundColor: "#fff",
         backgroundGradientFrom: "#fff",
         backgroundGradientTo: "#fff",
-        decimalPlaces: 0,
-        color: () => "#00ff99",
-        labelColor: () => "#1e1e1e",
+        decimalPlaces: 1,
+        color: (opacity = 1) => `rgba(0, 255, 153, ${opacity})`,
+        labelColor: (opacity = 1) => `rgba(30, 30, 30, ${opacity})`,
       }}
       style={{
         borderRadius: 10,
