@@ -1,5 +1,6 @@
 import { api } from "@/lib/api/apiClient";
 import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { useAuth } from "@/features/auth/AuthContext";
 
 type UnlockData = {
     availableMinutes: number,
@@ -26,11 +27,13 @@ type Props = {
 const UnlockContext = createContext<unlockDataContext | null>(null);
 
 export function UnlockProvider ({children}: Props) {
+    const { isAuthenticated } = useAuth();
     const [unlockData, setUnlockData] = useState<UnlockData | null>(null);
     const [rule, setRule] = useState<UnlockRule | null>(null)
     const [loading, setLoading] = useState(true);
 
     const fetchUnlockData = async () => {
+        if (!isAuthenticated) return;
         try {
             setLoading(true)
             const [ruleRes, dataRes] = await Promise.all ([
