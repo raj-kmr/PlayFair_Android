@@ -30,13 +30,13 @@ export function RootNavigator() {
 export default function RootLayout() {
   return (
     <PaperProvider>
-      <UnlockProvider>
-        <SessionProvider>
-          <AuthProvider>
+      <AuthProvider>
+        <UnlockProvider>
+          <SessionProvider>
             <RootNavigator />
-          </AuthProvider>
-        </SessionProvider>
-      </UnlockProvider>
+          </SessionProvider>
+        </UnlockProvider>
+      </AuthProvider>
     </PaperProvider>
   );
 }
