@@ -16,8 +16,22 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     return config
 })
 
+api.interceptors.response.use(
+    (response) => response,
+    async (error: AxiosError) => {
+        if (error.response?.status === 401) {
+            await tokenStore.remove()
+        }
+        return Promise.reject(error)
+    }
+)
+
 //error message extractor so won't deal with Axios internals
 export function getApiErrorMessage(err: unknown) {
     const e = err as AxiosError<any>;
     return e?.response?.data?.message || e?.message || "Something went wrong" 
+}
+
+export const savePushToken = async (token: string) => {
+    await api.post("/auth/push-token", { pushToken: token })
 }
