@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { api } from "@/lib/api/apiClient";
+import { useAuth } from "@/features/auth/AuthContext";
 
 
 type ActiveSession  = {
@@ -27,6 +28,7 @@ const STORAGE_KEY = "playfair.activeSession"; // Key for AsyncStorage
 * - perssistance across reloads
 */
 export function SessionProvider({children}: {children: React.ReactNode}) {
+    const { isAuthenticated } = useAuth();
     // state the store Active session
     const [activeSession, setActiveSession] = useState<ActiveSession | null>(null)
     // Stores how many seconds have passed since session started
@@ -34,12 +36,9 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
 
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    // Timer is derived from startedAt, prevents drift and survive reloads
-    // Start the timer
     const startTicker = (startedAtIso: string) => {
         if(intervalRef.current) clearInterval(intervalRef.current)
 
-        // converting session start time into milliseconds
         const startedAtMs = new Date(startedAtIso).getTime()
 
         const updateElapsed = () => {
@@ -51,17 +50,14 @@ export function SessionProvider({children}: {children: React.ReactNode}) {
         intervalRef.current = setInterval(updateElapsed, 1000)
     }
 
-    // Stop the timer and reset elapsed time.
     const stopTicker = () => {
         if(intervalRef.current) clearInterval(intervalRef.current)
         intervalRef.current = null;
         setElapsedSeconds(0)
     };
 
-    // Hydration strategy
-    // 1. Try local storage first (fast UI)
-    // 2. Then confirm with server /sessions/active (source of truth)
     const hydrate = async () => {
+        if (!isAuthenticated) return;
         const raw = await AsyncStorage.getItem(STORAGE_KEY)
         
         if(raw) {
