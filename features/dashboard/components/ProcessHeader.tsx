@@ -20,7 +20,10 @@ export default function ProgressHeader({
         </Text>
       </View>
 
-      <Text style={styles.percentage}>{percentage}%</Text>
+      <View style={styles.percentageWrap}>
+        <Text style={styles.percentage}>{percentage}</Text>
+        <Text style={styles.percentSign}>%</Text>
+      </View>
     </View>
   );
 }
@@ -28,33 +31,44 @@ export default function ProgressHeader({
 const styles = StyleSheet.create({
   container: {
     padding: 16,
-    borderRadius: 12,
-    backgroundColor: "#fff",
+    borderRadius: 16,
+    backgroundColor: "#1e293b",
     marginBottom: 16,
     flex: 1,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    borderColor: "#334155",
+    borderWidth: 1,
   },
 
-  leftSide: {},
-
   title: {
-    color: "#000",
-    fontSize: 18,
+    color: "#f1f5f9",
+    fontSize: 16,
     fontWeight: "700",
   },
 
   subtitle: {
-    color: "#000",
-    fontSize: 14,
-    marginTop: 6,
+    color: "#94a3b8",
+    fontSize: 13,
+    marginTop: 4,
+  },
+
+  percentageWrap: {
+    flexDirection: "row",
+    alignItems: "flex-start",
   },
 
   percentage: {
-    color: "#000",
+    color: "#a78bfa",
     fontSize: 28,
     fontWeight: "800",
-    marginTop: 8,
+  },
+
+  percentSign: {
+    color: "#64748b",
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 4,
   },
 });

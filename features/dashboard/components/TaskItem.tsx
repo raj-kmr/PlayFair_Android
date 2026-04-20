@@ -47,9 +47,9 @@ const styles = StyleSheet.create({
     gap: 12,
     padding: 14,
     borderRadius: 12,
-    backgroundColor: "#fff",
+    backgroundColor: "#1e293b",
     marginBottom: 12,
-    borderColor: "#e5e5e5",
+    borderColor: "#334155",
     borderWidth: 1
   },
 
@@ -58,15 +58,15 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: "#000",
+    borderColor: "#475569",
     marginTop: 2,
     alignItems: "center",
     justifyContent: "center"
   },
 
   checkBoxActive: {
-    backgroundColor: "#000",
-    borderColor: "#000",
+    backgroundColor: "#a78bfa",
+    borderColor: "#a78bfa",
   },
 
   content: {
@@ -74,25 +74,25 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: "#111",
+    color: "#f1f5f9",
     fontSize: 16,
     fontWeight: "600",
   },
 
   titleDone: {
     textDecorationLine: "line-through",
-    opacity: 0.7,
+    opacity: 0.5,
   },
 
   category: {
-    color: "#666",
+    color: "#94a3b8",
     marginTop: 4,
     fontSize: 12,
     textTransform: "capitalize",
   },
 
   description: {
-    color: "#888",
+    color: "#64748b",
     marginTop: 6,
     fontSize: 13,
   },

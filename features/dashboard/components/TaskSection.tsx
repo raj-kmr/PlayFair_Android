@@ -308,12 +308,12 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   sectionTitle: {
-    color: "#000",
+    color: "#f1f5f9",
     fontSize: 20,
     fontWeight: "700",
   },
   addText: {
-    color: "#000",
+    color: "#a78bfa",
     fontSize: 15,
     fontWeight: "700",
   },
@@ -322,27 +322,31 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   emptyState: {
-    paddingVertical: 24,
+    paddingVertical: 32,
     alignItems: "center",
+    backgroundColor: "#1e293b",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#334155",
   },
   emptyTitle: {
-    color: "#000",
+    color: "#f1f5f9",
     fontSize: 16,
     fontWeight: "700",
   },
   emptyText: {
-    color: "#1a1a1a",
+    color: "#94a3b8",
     marginTop: 8,
     textAlign: "center",
+    paddingHorizontal: 24,
   },
   group: {
     marginTop: 12,
   },
-
   groupTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#000",
+    color: "#94a3b8",
     marginBottom: 10,
   },
   completedHeader: {
@@ -351,23 +355,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 8,
   },
-
   completedList: {
     marginTop: 8,
   },
-
   chevron: {
     fontSize: 18,
     color: "#000",
     fontWeight: "600",
   },
-
   completedLeft: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
   },
-
   clearText: {
     color: "#ef4444",
     fontWeight: "600",
