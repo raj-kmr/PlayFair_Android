@@ -27,13 +27,14 @@ export default function GameList({games, onPressItem,  refreshing = false, onRef
 const styles = StyleSheet.create({
     list: {
         paddingBottom: 24
-    }, 
+    },
     emptyWrap: {
         flexGrow: 1,
         justifyContent: "center"
-    }, 
+    },
     emptyText: {
         textAlign: "center",
-        opacity: 0.7
+        color: "#94a3b8",
+        fontSize: 14,
     }
 })

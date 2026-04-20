@@ -14,17 +14,10 @@ export default function AddGameCard({ onPress }: Props) {
   return (
     <Pressable
       onPress={onPress}
-      className="w-full rounded-2xl p-4 mb-2 items-center justify-center 
-             bg-zinc-100 active:scale-[0.98] active:opacity-80"
+      className="w-14 h-14 rounded-full bg-gradient-to-br from-violet-600 to-purple-600 items-center justify-center active:scale-[0.95] shadow-lg shadow-violet-500/30"
     >
-      <View className="items-baseline justify-center gap-2 flex flex-row">
-        <View className="w-6 h-6 rounded-full  bg-white flex items-center justify-center  shadow-sm">
-          <Text className="text-sm font-medium text-zinc-800">+</Text>
-        </View>
-
-        <Text className="mt-2 text-sm font-bold text-zinc-600">
-          Add Game
-        </Text>
+      <View className="items-center justify-center">
+        <Text className="text-3xl font-bold text-white mb-[-2]">+</Text>
       </View>
     </Pressable>
   );

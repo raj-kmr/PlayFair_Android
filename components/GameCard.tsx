@@ -79,10 +79,11 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: "row",
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: "#334155",
     borderRadius: 14,
     padding: 12,
     marginBottom: 12,
+    backgroundColor: "#1e293b",
   },
   cover: {
     width: 54,
@@ -96,7 +97,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginRight: 12,
     borderWidth: 1,
-    borderColor: "#2a2a2a",
+    borderColor: "#334155",
+    backgroundColor: "#0f172a",
   },
   cardBody: {
     flex: 1,
@@ -105,10 +107,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     marginBottom: 4,
+    color: "#f1f5f9",
   },
   meta: {
     fontSize: 12,
-    opacity: 0.75,
+    color: "#94a3b8",
   },
   actions: {
     marginTop: 10,
