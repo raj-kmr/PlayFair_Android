@@ -31,22 +31,25 @@ const styles = StyleSheet.create({
   selectorContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#1e293b',
     paddingVertical: 8,
-    borderRadius: 8,
+    borderRadius: 10,
     marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#334155',
   },
   rangeText: {
     fontSize: 14,
-    color: '#666',
-    paddingHorizontal: 12,
+    color: '#94a3b8',
+    paddingHorizontal: 16,
     paddingVertical: 6,
+    borderRadius: 6,
   },
   selectedRange: {
-    color: '#000',
-    fontWeight: '600',
-    backgroundColor: '#e0f7fa',
-    borderRadius: 4,
+    color: '#f1f5f9',
+    fontWeight: '700',
+    backgroundColor: '#334155',
+    borderRadius: 6,
   },
 });
 

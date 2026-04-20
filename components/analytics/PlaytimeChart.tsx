@@ -1,7 +1,8 @@
-import { Dimensions } from "react-native";
+import { Dimensions, View, StyleSheet } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 
 const screenWidth = Dimensions.get("window").width;
+const chartWidth = screenWidth - 64; // Account for padding
 
 type ChartDataPoint = {
   day?: string;
@@ -24,34 +25,56 @@ export default function PlaytimeChart({ data }: Props) {
   );
 
   const labels = safeData.map((d) => d.day?.slice(5, 10) || "X");
-  const values = safeData.map((d) => d.minutes > 0 ? d.minutes : 0.1);
+  const values = safeData.map((d) => (d.minutes > 0 ? d.minutes : 0.1));
 
-  // console.log("Chart Values:", values);
-  // console.log("Chart Labels:", labels);
-
-  if (values.length === 0) {
+  if (values.length === 0 || safeData.length === 0) {
     return null;
   }
+
   return (
-    <LineChart
-      data={{
-        labels,
-        datasets: [{ data: values }],
-      }}
-      width={screenWidth - 20}
-      height={220}
-      yAxisSuffix="m"
-      chartConfig={{
-        backgroundColor: "#fff",
-        backgroundGradientFrom: "#fff",
-        backgroundGradientTo: "#fff",
-        decimalPlaces: 1,
-        color: (opacity = 1) => `rgba(0, 255, 153, ${opacity})`,
-        labelColor: (opacity = 1) => `rgba(30, 30, 30, ${opacity})`,
-      }}
-      style={{
-        borderRadius: 10,
-      }}
-    ></LineChart>
+    <View style={styles.container}>
+      <LineChart
+        data={{
+          labels,
+          datasets: [{ data: values }],
+        }}
+        width={chartWidth}
+        height={220}
+        yAxisSuffix="m"
+        yAxisInterval={Math.max(...values) > 60 ? 60 : Math.max(...values, 30)}
+        chartConfig={{
+          backgroundColor: "#1e293b",
+          backgroundGradientFrom: "#1e293b",
+          backgroundGradientTo: "#0f172a",
+          decimalPlaces: 0,
+          color: (opacity = 1) => `rgba(167, 139, 250, ${opacity})`,
+          labelColor: (opacity = 1) => `rgba(148, 163, 184, ${opacity})`,
+          propsForBackgroundLines: {
+            stroke: "#334155",
+            strokeWidth: 1,
+            strokeDasharray: "4, 4",
+          },
+          propsForVerticalLines: {
+            stroke: "#334155",
+            strokeWidth: 1,
+          },
+          style: {
+            borderRadius: 12,
+          },
+        }}
+        bezier
+        style={styles.chart}
+      />
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chart: {
+    borderRadius: 12,
+  },
+});

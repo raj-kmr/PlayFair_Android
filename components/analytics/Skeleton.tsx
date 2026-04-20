@@ -70,10 +70,10 @@ const Skeleton = ({
 
 const styles = StyleSheet.create({
   skeletonContainer: {
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#1e293b',
   },
   skeletonContent: {
-    backgroundColor: '#fff',
+    backgroundColor: '#334155',
   },
 });
 

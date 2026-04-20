@@ -17,7 +17,7 @@ export default function StatCard({ title, value, trend = null }: Props) {
           <Ionicons
             name="trending-up"
             size={16}
-            color="#00C853"
+            color="#34d399"
             style={{ marginLeft: 4 }}
           />
         )}
@@ -25,7 +25,7 @@ export default function StatCard({ title, value, trend = null }: Props) {
           <Ionicons
             name="trending-down"
             size={16}
-            color="#ff4444"
+            color="#f87171"
             style={{ marginLeft: 4 }}
           />
         )}
@@ -37,22 +37,25 @@ export default function StatCard({ title, value, trend = null }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#dddddd",
+    backgroundColor: "#1e293b",
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 12,
     marginRight: 10,
     minWidth: 100,
+    borderWidth: 1,
+    borderColor: "#334155",
+    flex: 1,
   },
 
   value: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#000",
+    color: "#f1f5f9",
   },
 
   label: {
     fontSize: 12,
-    color: "#1e1e1e",
+    color: "#94a3b8",
     marginTop: 5,
   },
 });

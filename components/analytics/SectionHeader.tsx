@@ -7,9 +7,9 @@ export default function SectionHeader({title}: {title: string}) {
 
 const styles = StyleSheet.create({
     header: {
-        fontSize: 18,
-        fontWeight: "600",
-        marginVertical: 10,
-        color: "#000"
+        fontSize: 16,
+        fontWeight: "700",
+        marginVertical: 12,
+        color: "#f1f5f9",
     }
 })

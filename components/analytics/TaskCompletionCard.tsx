@@ -9,7 +9,7 @@ interface Props {
 
 export default function TaskCompletionCard({ percentage, completed, total, timeRange = '7d' }: Props) {
   const timeRangeText = timeRange === '7d' ? 'Last 7 days' : 'Last 30 days';
-  
+
   return (
     <View style={styles.container}>
       <Text style={styles.value}>{percentage.toFixed(0)}%</Text>
@@ -25,23 +25,27 @@ export default function TaskCompletionCard({ percentage, completed, total, timeR
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#dfdfdf",
+    backgroundColor: "#1e293b",
     padding: 20,
-    borderRadius: 10,
+    borderRadius: 12,
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#334155",
   },
   value: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#00ff99",
+    color: "#34d399",
   },
   label: {
-    color: "#1e1e1e",
+    color: "#f1f5f9",
     marginTop: 5,
+    fontSize: 14,
+    fontWeight: "600",
   },
   subtext: {
     fontSize: 12,
-    color: "#666",
+    color: "#94a3b8",
     marginTop: 8,
   },
 });
