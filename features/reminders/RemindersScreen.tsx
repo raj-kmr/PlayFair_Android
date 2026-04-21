@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
-import { View, FlatList, TouchableOpacity, Text, Alert } from "react-native";
-import { AxiosError } from "axios";
+import {
+  View,
+  FlatList,
+  TouchableOpacity,
+  Text,
+  Alert,
+  StyleSheet,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 
 import ReminderCard from "./components/ReminderCard";
 import ReminderFormModal from "./components/ReminderFormModal";
@@ -40,19 +47,19 @@ export default function ReminderScreen() {
     try {
       console.log("Creating reminder with data:", data);
       await createReminder(data);
-      
+
       if (data.reminderType === "game_time" && data.scheduledTime) {
-        await scheduleGameTimeAlert(
-          Date.now(),
-          data.scheduledTime,
-        );
+        await scheduleGameTimeAlert(Date.now(), data.scheduledTime);
       }
-      
+
       fetchReminders();
     } catch (err: any) {
       console.error("Create reminder error:", err);
       console.error("Response data:", err?.response?.data);
-      Alert.alert("Error", err?.response?.data?.error || "Failed to create reminder");
+      Alert.alert(
+        "Error",
+        err?.response?.data?.error || "Failed to create reminder"
+      );
     }
   };
 
@@ -61,7 +68,7 @@ export default function ReminderScreen() {
     try {
       console.log("Updating reminder with data:", data);
       await updateReminder(selected.id, data);
-      
+
       if (data.reminderType === "game_time" && data.scheduledTime) {
         await scheduleGameTimeAlert(
           selected.id,
@@ -71,32 +78,34 @@ export default function ReminderScreen() {
       } else if (selected.reminder_type === "game_time") {
         await cancelGameTimeAlert(selected.id);
       }
-      
+
       setSelected(null);
       fetchReminders();
     } catch (err: any) {
       console.error("Update reminder error:", err);
       console.error("Response data:", err?.response?.data);
-      Alert.alert("Error", err?.response?.data?.error || "Failed to update reminder");
+      Alert.alert(
+        "Error",
+        err?.response?.data?.error || "Failed to update reminder"
+      );
     }
   };
 
   const handleDelete = async (id: number) => {
-    const reminder = reminders.find(r => r.id === id);
-    
+    const reminder = reminders.find((r) => r.id === id);
+
     if (reminder?.reminder_type === "game_time") {
       await cancelGameTimeAlert(id);
     }
-    
+
     await deleteReminder(id);
     fetchReminders();
   };
 
   return (
-    <View style={{ flex: 1, padding: 16, backgroundColor: '#f3f4f6' }}>
-
+    <View style={styles.container}>
       <FlatList
-        data={reminders.filter(r => r.is_active)}
+        data={reminders.filter((r) => r.is_active)}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <ReminderCard
@@ -108,23 +117,30 @@ export default function ReminderScreen() {
             onDelete={() => handleDelete(item.id)}
           />
         )}
+        ListEmptyComponent={
+          <View style={styles.emptyState}>
+            <MaterialIcons name="notifications-none" size={48} color="#475569" />
+            <Text style={styles.emptyTitle}>No reminders yet</Text>
+            <Text style={styles.emptyText}>
+              Create a reminder to stay on track with your gaming goals
+            </Text>
+          </View>
+        }
+        contentContainerStyle={
+          reminders.filter((r) => r.is_active).length === 0
+            ? { flexGrow: 1 }
+            : undefined
+        }
       />
 
       <TouchableOpacity
-        style={{
-          backgroundColor: '#3b82f6',
-          padding: 16,
-          borderRadius: 9999,
-          position: 'absolute',
-          bottom: 24,
-          right: 24,
-        }}
+        style={styles.fab}
         onPress={() => {
           setSelected(null);
           setModalVisible(true);
         }}
       >
-        <Text style={{ color: 'white', fontSize: 24 }}>+</Text>
+        <MaterialIcons name="add" size={24} color="#ffffff" />
       </TouchableOpacity>
 
       <ReminderFormModal
@@ -136,3 +152,46 @@ export default function ReminderScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#020617",
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 48,
+    paddingHorizontal: 24,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#f1f5f9",
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "#94a3b8",
+    textAlign: "center",
+    lineHeight: 20,
+  },
+  fab: {
+    backgroundColor: "#7c3aed",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    position: "absolute",
+    bottom: 24,
+    right: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#7c3aed",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+});

@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { Reminder } from "@/lib/reminders";
 
 interface Props {
@@ -9,16 +10,16 @@ interface Props {
 }
 
 export default function ReminderCard({ reminder, onEdit, onDelete }: Props) {
-  const { icon, headerBg, textColor } = useMemo(() => {
+  const { icon, iconBg, textColor } = useMemo(() => {
     switch (reminder.reminder_type) {
       case "game_time":
-        return { icon: "🎮", headerBg: "bg-indigo-50", textColor: "text-indigo-600" };
+        return { icon: "sports-esports", iconBg: "#312e81", textColor: "#818cf8" };
       case "session_limit":
-        return { icon: "⏱️", headerBg: "bg-amber-50", textColor: "text-amber-600" };
+        return { icon: "timer", iconBg: "#78350f", textColor: "#fbbf24" };
       case "break_reminder":
-        return { icon: "☕", headerBg: "bg-emerald-50", textColor: "text-emerald-600" };
+        return { icon: "coffee", iconBg: "#064e3b", textColor: "#34d399" };
       default:
-        return { icon: "🔔", headerBg: "bg-blue-50", textColor: "text-blue-600" };
+        return { icon: "notifications", iconBg: "#1e3a5f", textColor: "#60a5fa" };
     }
   }, [reminder.reminder_type]);
 
@@ -30,40 +31,38 @@ export default function ReminderCard({ reminder, onEdit, onDelete }: Props) {
   }, [reminder.reminder_type]);
 
   return (
-    <View className="bg-white rounded-2xl mb-4 mx-1 shadow-sm border border-gray-100 overflow-hidden">
-      <View className={`p-4 ${headerBg} border-b border-gray-100`}>
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center" style={{ gap: 8 }}>
-            <Text className="text-2xl">{icon}</Text>
-            <Text className="text-base font-bold text-gray-800">{formatTitle}</Text>
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <View style={styles.titleRow}>
+          <View style={[styles.iconBox, { backgroundColor: iconBg }]}>
+            <MaterialIcons name={icon} size={20} color="#ffffff" />
           </View>
-          <View className={`px-3 py-1 rounded-full ${headerBg}`}>
-            <Text className={`text-xs font-semibold ${textColor}`}>
-              {reminder.reminder_value} min
-            </Text>
-          </View>
+          <Text style={styles.title}>{formatTitle}</Text>
+        </View>
+        <View style={styles.badge}>
+          <Text style={[styles.badgeText, { color: textColor }]}>
+            {reminder.reminder_value} min
+          </Text>
         </View>
       </View>
 
-      <View className="p-4">
+      <View style={styles.body}>
         {reminder.scheduled_time && (
-          <View className="flex-row items-center mb-3">
-            <Text className="text-lg" style={{ marginRight: 8 }}>📅</Text>
-            <View className="flex-1">
-              <Text className="text-xs text-gray-400 font-medium">Scheduled</Text>
-              <Text className="text-sm text-gray-700 font-medium">
-                {reminder.scheduled_time}
-              </Text>
+          <View style={styles.row}>
+            <MaterialIcons name="event" size={18} color="#64748b" style={styles.rowIcon} />
+            <View style={styles.rowContent}>
+              <Text style={styles.rowLabel}>Scheduled</Text>
+              <Text style={styles.rowValue}>{reminder.scheduled_time}</Text>
             </View>
           </View>
         )}
 
         {reminder.scheduled_days && reminder.scheduled_days.length > 0 && (
-          <View className="flex-row items-center mb-3">
-            <Text className="text-lg" style={{ marginRight: 8 }}>🔄</Text>
-            <View className="flex-1">
-              <Text className="text-xs text-gray-400 font-medium">Repeat</Text>
-              <Text className="text-sm text-gray-700 font-medium">
+          <View style={styles.row}>
+            <MaterialIcons name="repeat" size={18} color="#64748b" style={styles.rowIcon} />
+            <View style={styles.rowContent}>
+              <Text style={styles.rowLabel}>Repeat</Text>
+              <Text style={styles.rowValue}>
                 {reminder.scheduled_days.map((d) => d.slice(0, 3)).join(" • ")}
               </Text>
             </View>
@@ -71,32 +70,130 @@ export default function ReminderCard({ reminder, onEdit, onDelete }: Props) {
         )}
 
         {reminder.game_name && (
-          <View className="flex-row items-center">
-            <Text className="text-lg" style={{ marginRight: 8 }}>🎯</Text>
-            <View className="flex-1">
-              <Text className="text-xs text-gray-400 font-medium">Game</Text>
-              <Text className="text-sm text-gray-700 font-medium">
-                {reminder.game_name}
-              </Text>
+          <View style={styles.row}>
+            <MaterialIcons name="games" size={18} color="#64748b" style={styles.rowIcon} />
+            <View style={styles.rowContent}>
+              <Text style={styles.rowLabel}>Game</Text>
+              <Text style={styles.rowValue}>{reminder.game_name}</Text>
             </View>
           </View>
         )}
       </View>
 
-      <View className="flex-row justify-end px-4 pb-4" style={{ gap: 8 }}>
-        <TouchableOpacity
-          onPress={onEdit}
-          className="px-4 py-2.5 bg-gray-50 rounded-xl active:bg-gray-100"
-        >
-          <Text className="text-gray-700 font-semibold text-sm">Edit</Text>
+      <View style={styles.actions}>
+        <TouchableOpacity onPress={onEdit} style={styles.editBtn}>
+          <Text style={styles.editText}>Edit</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          onPress={onDelete}
-          className="px-4 py-2.5 bg-red-50 rounded-xl active:bg-red-100"
-        >
-          <Text className="text-red-500 font-semibold text-sm">Delete</Text>
+        <TouchableOpacity onPress={onDelete} style={styles.deleteBtn}>
+          <Text style={styles.deleteText}>Delete</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    backgroundColor: "#1e293b",
+    borderRadius: 16,
+    marginHorizontal: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "#334155",
+    overflow: "hidden",
+  },
+  header: {
+    padding: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#334155",
+  },
+  titleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 12,
+  },
+  iconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#f1f5f9",
+  },
+  badge: {
+    alignSelf: "flex-start",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    backgroundColor: "#0f172a",
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#334155",
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  body: {
+    padding: 16,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  rowIcon: {
+    marginRight: 10,
+  },
+  rowContent: {
+    flex: 1,
+  },
+  rowLabel: {
+    fontSize: 11,
+    color: "#64748b",
+    fontWeight: "500",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  rowValue: {
+    fontSize: 14,
+    color: "#94a3b8",
+    fontWeight: "500",
+    marginTop: 2,
+  },
+  actions: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 16,
+  },
+  editBtn: {
+    backgroundColor: "#334155",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  editText: {
+    color: "#f1f5f9",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+  deleteBtn: {
+    backgroundColor: "#450a0a",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#7f1d1d",
+  },
+  deleteText: {
+    color: "#f87171",
+    fontSize: 13,
+    fontWeight: "600",
+  },
+});
