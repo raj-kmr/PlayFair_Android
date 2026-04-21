@@ -13,6 +13,7 @@ import {
 import React, { useState } from "react";
 import Skeleton from "@/components/analytics/Skeleton";
 import TimeRangeSelector from "@/components/analytics/TimeRangeSelector";
+import { MaterialIcons } from "@expo/vector-icons";
 
 const formatMinutesToHM = (minutes: number) => {
   if (!minutes || minutes <= 0) return "0m";
@@ -75,8 +76,13 @@ export default function AnalyticsScreen() {
   if (loading && !refreshing) {
     return (
       <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.headerIcon}>
+            <MaterialIcons name="insights" size={24} color="#ffffff" />
+          </View>
+          <Text style={styles.headerTitle}>Analytics</Text>
+        </View>
         <SectionHeader title="Overview" />
-
         <View style={styles.row}>
           <StatCard
             title="Total minutes"
@@ -87,7 +93,6 @@ export default function AnalyticsScreen() {
             value={<Skeleton width={60} height={24} borderRadius={4} />}
           />
         </View>
-
         <View style={styles.row}>
           <StatCard
             title="Avg Session"
@@ -98,10 +103,8 @@ export default function AnalyticsScreen() {
             value={<Skeleton width={80} height={24} borderRadius={4} />}
           />
         </View>
-
         <SectionHeader title="Weekly Playtime" />
         <Skeleton width="100%" height={200} borderRadius={10} margin={10} />
-
         <SectionHeader title="Productivity (Last 7 Days)" />
         <Skeleton width="100%" height={100} borderRadius={10} margin={10} />
       </View>
@@ -111,6 +114,7 @@ export default function AnalyticsScreen() {
   if (error) {
     return (
       <View style={styles.errorContainer}>
+        <MaterialIcons name="error-outline" size={48} color="#f87171" />
         <Text style={styles.errorTitle}>Failed to load analytics</Text>
         <Text style={styles.errorMessage}>{error}</Text>
       </View>
@@ -124,6 +128,7 @@ export default function AnalyticsScreen() {
   if (hasNoData) {
     return (
       <View style={styles.emptyContainer}>
+        <MaterialIcons name="insert-chart-outlined" size={48} color="#475569" />
         <Text style={styles.emptyTitle}>No data yet</Text>
         <Text style={styles.emptyText}>
           Start tracking your gaming sessions and completing tasks to see your
@@ -139,23 +144,33 @@ export default function AnalyticsScreen() {
       refreshControl={
         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
       }
+      showsVerticalScrollIndicator={false}
     >
-      <View style={{ marginBottom: 10 }}>
-        <TimeRangeSelector
-          selectedRange={timeRange}
-          onRangeChange={setTimeRange}
-        />
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerIcon}>
+          <MaterialIcons name="insights" size={24} color="#ffffff" />
+        </View>
+        <View>
+          <Text style={styles.headerTitle}>Analytics</Text>
+          <Text style={styles.headerSubtitle}>
+            Track your productivity journey
+          </Text>
+        </View>
       </View>
 
-      {/* Total Playtime */}
-      <SectionHeader title="Overview" />
+      {/* Time Range Selector */}
+      <TimeRangeSelector
+        selectedRange={timeRange}
+        onRangeChange={setTimeRange}
+      />
 
+      {/* Overview Section */}
+      <SectionHeader title="Overview" />
       <View style={styles.row}>
         <StatCard
           title="Total Playtime"
-          value={
-            formatMinutesToHM(playtime?.total_minutes || 0)
-          }
+          value={formatMinutesToHM(playtime?.total_minutes || 0)}
           trend={playtimeTrend}
         />
         <StatCard
@@ -168,61 +183,39 @@ export default function AnalyticsScreen() {
       <View style={styles.row}>
         <StatCard
           title="Avg Session"
-          value={
-            formatMinutesToHM(sessions?.avg_session_minutes || 0)
-          }
+          value={formatMinutesToHM(sessions?.avg_session_minutes || 0)}
         />
         <StatCard
           title="Max Session"
-          value={
-            formatMinutesToHM(sessions?.max_session_minutes || 0)
-          }
+          value={formatMinutesToHM(sessions?.max_session_minutes || 0)}
         />
       </View>
 
-      {/* Playtime chart */}
+      {/* Playtime Chart */}
       <SectionHeader
         title={`${timeRange === "7d" ? "Weekly" : "Monthly"} Playtime`}
       />
-      {timeRange === "7d" ? (
-        playtime?.weekly && playtime.weekly.length > 0 ? (
-          <PlaytimeChart data={normalizeWeeklyData(playtime.weekly)} />
+      <View style={styles.chartContainer}>
+        {timeRange === "7d" ? (
+          playtime?.weekly && playtime.weekly.length > 0 ? (
+            <PlaytimeChart data={normalizeWeeklyData(playtime.weekly)} />
+          ) : (
+            <View style={styles.emptyChart}>
+              <MaterialIcons name="trending-flat" size={32} color="#475569" />
+              <Text style={styles.emptyChartText}>No weekly data available</Text>
+            </View>
+          )
+        ) : playtime?.monthly && playtime.monthly.length > 0 ? (
+          <PlaytimeChart data={normalizeMonthlyData(playtime.monthly)} />
         ) : (
-          <View
-            style={{
-              height: 200,
-              backgroundColor: "#f5f5f5",
-              borderRadius: 10,
-              justifyContent: "center",
-              alignItems: "center",
-              marginVertical: 10,
-            }}
-          >
-            <Text style={{ color: "#666", fontSize: 14 }}>
-              No weekly data available
-            </Text>
+          <View style={styles.emptyChart}>
+            <MaterialIcons name="trending-flat" size={32} color="#475569" />
+            <Text style={styles.emptyChartText}>No monthly data available</Text>
           </View>
-        )
-      ) : playtime?.monthly && playtime.monthly.length > 0 ? (
-        <PlaytimeChart data={normalizeMonthlyData(playtime.monthly)} />
-      ) : (
-        <View
-          style={{
-            height: 200,
-            backgroundColor: "#f5f5f5",
-            borderRadius: 10,
-            justifyContent: "center",
-            alignItems: "center",
-            marginVertical: 10,
-          }}
-        >
-          <Text style={{ color: "#666", fontSize: 14 }}>
-            No monthly data available
-          </Text>
-        </View>
-      )}
+        )}
+      </View>
 
-      {/* Task chart */}
+      {/* Task Completion */}
       <SectionHeader
         title={`Productivity (${timeRange === "7d" ? "Last 7 Days" : "Last 30 Days"})`}
       />
@@ -239,54 +232,103 @@ export default function AnalyticsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    padding: 10,
+    backgroundColor: "#020617",
+    padding: 16,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 16,
+    marginTop: 8,
+  },
+  headerIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "#1e293b",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#334155",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#f1f5f9",
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "#94a3b8",
+    marginTop: 2,
   },
   loader: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#020617",
   },
   errorContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#020617",
     padding: 20,
   },
   errorTitle: {
     fontSize: 18,
-    fontWeight: "600",
-    color: "#000",
+    fontWeight: "700",
+    color: "#f1f5f9",
+    marginTop: 16,
     marginBottom: 8,
   },
   errorMessage: {
     fontSize: 14,
-    color: "#666",
+    color: "#94a3b8",
     textAlign: "center",
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#020617",
     padding: 20,
   },
   emptyTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#000",
+    color: "#f1f5f9",
     marginBottom: 12,
   },
   emptyText: {
     fontSize: 14,
-    color: "#666",
+    color: "#94a3b8",
     textAlign: "center",
     lineHeight: 20,
+    paddingHorizontal: 24,
   },
   row: {
     flexDirection: "row",
-    marginBottom: 10,
+    marginBottom: 12,
+    gap: 12,
+  },
+  chartContainer: {
+    alignItems: "center",
+    marginVertical: 8,
+  },
+  emptyChart: {
+    height: 200,
+    backgroundColor: "#1e293b",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#334155",
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  emptyChartText: {
+    color: "#94a3b8",
+    fontSize: 14,
+    marginTop: 8,
   },
 });
